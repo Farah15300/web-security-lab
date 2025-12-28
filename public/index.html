@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratoire de Sécurité Web</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔒 Laboratoire de Sécurité Web</h1>
+            <p>Environnement d'apprentissage éducatif</p>
+        </header>
+
+        <nav class="modules">
+            <button onclick="showModule('permissions')" class="active">Permissions Navigateur</button>
+            <button onclick="showModule('xss')">XSS (Cross-Site Scripting)</button>
+            <button onclick="showModule('csrf')">CSRF (Cross-Site Request Forgery)</button>
+            <button onclick="showModule('owasp')">OWASP Top 10</button>
+        </nav>
+
+        <!-- Module Permissions -->
+        <div id="permissions" class="module active">
+            <h2>Permissions du Navigateur</h2>
+            <div class="info-box">
+                <p><strong>Objectif:</strong> Comprendre comment demander et gérer les permissions utilisateur de manière éthique.</p>
+            </div>
+
+            <div class="demo-section">
+                <h3>1. Permission Caméra</h3>
+                <button onclick="requestCamera()">Demander Permission Caméra</button>
+                <div id="camera-status" class="status"></div>
+                <video id="video" autoplay playsinline style="display:none; max-width:100%; margin-top:10px;"></video>
+                <button onclick="stopCamera()" style="display:none;" id="stop-camera">Arrêter la Caméra</button>
+                
+                <div class="code-box">
+                    <h4>Code:</h4>
+                    <pre><code>navigator.mediaDevices.getUserMedia({ video: true })
+  .then(stream => {
+    video.srcObject = stream;
+    // ✅ Permission accordée explicitement
+  })
+  .catch(err => {
+    // ❌ Permission refusée
+  });</code></pre>
+                </div>
+            </div>
+
+            <div class="demo-section">
+                <h3>2. Géolocalisation</h3>
+                <button onclick="requestLocation()">Demander Position</button>
+                <div id="location-status" class="status"></div>
+                
+                <div class="code-box">
+                    <h4>Code:</h4>
+                    <pre><code>navigator.geolocation.getCurrentPosition(
+  position => {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+  },
+  error => console.error(error)
+);</code></pre>
+                </div>
+            </div>
+
+            <div class="demo-section">
+                <h3>3. Notifications</h3>
+                <button onclick="requestNotification()">Demander Permission Notifications</button>
+                <div id="notification-status" class="status"></div>
+            </div>
+
+            <div class="info-box warning">
+                <h4>⚠️ Bonnes Pratiques:</h4>
+                <ul>
+                    <li>Toujours expliquer POURQUOI vous demandez une permission</li>
+                    <li>Demander les permissions au moment approprié (pas au chargement)</li>
+                    <li>Respecter le refus de l'utilisateur</li>
+                    <li>Permettre de révoquer les permissions facilement</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Module XSS -->
+        <div id="xss" class="module">
+            <h2>XSS - Cross-Site Scripting</h2>
+            <div class="info-box">
+                <p><strong>Définition:</strong> Injection de code JavaScript malveillant dans une page web.</p>
+            </div>
+
+            <div class="demo-section">
+                <h3>Version VULNÉRABLE ⚠️</h3>
+                <textarea id="vulnerable-input" placeholder="Essayez: <img src=x onerror=alert('XSS')>"></textarea>
+                <button onclick="submitVulnerable()">Soumettre (Vulnérable)</button>
+                <div id="vulnerable-output" class="output"></div>
+                
+                <div class="info-box warning">
+                    <strong>Problème:</strong> Le contenu est inséré directement sans sanitisation.
+                </div>
+            </div>
+
+            <div class="demo-section">
+                <h3>Version SÉCURISÉE ✅</h3>
+                <textarea id="secure-input" placeholder="Essayez: <img src=x onerror=alert('XSS')>"></textarea>
+                <button onclick="submitSecure()">Soumettre (Sécurisé)</button>
+                <div id="secure-output" class="output"></div>
+                
+                <div class="info-box success">
+                    <strong>Solution:</strong> Sanitisation/échappement du HTML avant affichage.
+                    <pre><code>text.replace(/</g, '&lt;').replace(/>/g, '&gt;')</code></pre>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h4>Protection contre XSS:</h4>
+                <ul>
+                    <li>Toujours échapper les données utilisateur</li>
+                    <li>Utiliser Content Security Policy (CSP)</li>
+                    <li>Ne jamais utiliser innerHTML avec des données non fiables</li>
+                    <li>Utiliser textContent ou créer des éléments DOM</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Module CSRF -->
+        <div id="csrf" class="module">
+            <h2>CSRF - Cross-Site Request Forgery</h2>
+            <div class="info-box">
+                <p><strong>Définition:</strong> Forcer un utilisateur authentifié à exécuter des actions non désirées.</p>
+            </div>
+
+            <div class="demo-section">
+                <h3>Version VULNÉRABLE ⚠️</h3>
+                <input type="text" id="vulnerable-to" placeholder="Destinataire">
+                <input type="number" id="vulnerable-amount" placeholder="Montant">
+                <button onclick="vulnerableTransfer()">Transférer (Vulnérable)</button>
+                <div id="vulnerable-transfer-result" class="status"></div>
+                
+                <div class="info-box warning">
+                    <strong>Problème:</strong> Aucune vérification que la requête provient du site légitime.
+                </div>
+            </div>
+
+            <div class="demo-section">
+                <h3>Version SÉCURISÉE ✅</h3>
+                <input type="text" id="secure-to" placeholder="Destinataire">
+                <input type="number" id="secure-amount" placeholder="Montant">
+                <button onclick="secureTransfer()">Transférer (Sécurisé)</button>
+                <div id="secure-transfer-result" class="status"></div>
+                
+                <div class="info-box success">
+                    <strong>Solution:</strong> Token CSRF unique pour chaque session.
+                    <div id="csrf-token-display" style="margin-top:10px; font-family:monospace;"></div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h4>Protection contre CSRF:</h4>
+                <ul>
+                    <li>Utiliser des tokens CSRF uniques</li>
+                    <li>Vérifier l'origine des requêtes (Origin/Referer headers)</li>
+                    <li>Utiliser SameSite cookies</li>
+                    <li>Demander une re-authentification pour les actions sensibles</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Module OWASP -->
+        <div id="owasp" class="module">
+            <h2>OWASP Top 10 (2021)</h2>
+            <div class="info-box">
+                <p><strong>OWASP:</strong> Open Web Application Security Project - Les 10 risques de sécurité les plus critiques.</p>
+            </div>
+
+            <div class="owasp-list">
+                <div class="owasp-item">
+                    <h3>A01: Broken Access Control</h3>
+                    <p>Les utilisateurs peuvent accéder à des ressources non autorisées.</p>
+                    <strong>Exemple:</strong> Modifier l'ID dans l'URL pour voir le profil d'un autre utilisateur.
+                </div>
+
+                <div class="owasp-item">
+                    <h3>A02: Cryptographic Failures</h3>
+                    <p>Échec de protection des données sensibles (mots de passe, cartes bancaires).</p>
+                    <strong>Solution:</strong> Chiffrement, HTTPS, hashage des mots de passe.
+                </div>
+
+                <div class="owasp-item">
+                    <h3>A03: Injection</h3>
+                    <p>SQL, XSS, commande OS - injection de code malveillant.</p>
+                    <strong>Solution:</strong> Paramètres préparés, validation des entrées.
+                </div>
+
+                <div class="owasp-item">
+                    <h3>A04: Insecure Design</h3>
+                    <p>Failles de conception et d'architecture.</p>
+                    <strong>Solution:</strong> Threat modeling, design patterns sécurisés.
+                </div>
+
+                <div class="owasp-item">
+                    <h3>A05: Security Misconfiguration</h3>
+                    <p>Configurations par défaut, messages d'erreur verbeux.</p>
+                    <strong>Solution:</strong> Hardening, désactivation des fonctionnalités inutiles.
+                </div>
+
+                <div class="owasp-item">
+                    <h3>A06: Vulnerable Components</h3>
+                    <p>Utilisation de bibliothèques avec des vulnérabilités connues.</p>
+                    <strong>Solution:</strong> Mise à jour régulière, audit des dépendances.
+                </div>
+
+                <div class="owasp-item">
+                    <h3>A07: Authentication Failures</h3>
+                    <p>Failles dans l'authentification et la gestion de session.</p>
+                    <strong>Solution:</strong> MFA, rate limiting, gestion sécurisée des sessions.
+                </div>
+
+                <div class="owasp-item">
+                    <h3>A08: Software Data Integrity</h3>
+                    <p>Code et infrastructure sans vérification d'intégrité.</p>
+                    <strong>Solution:</strong> Signature de code, CI/CD sécurisé.
+                </div>
+
+                <div class="owasp-item">
+                    <h3>A09: Security Logging Failures</h3>
+                    <p>Logging et monitoring insuffisants.</p>
+                    <strong>Solution:</strong> Logs détaillés, alertes, SIEM.
+                </div>
+
+                <div class="owasp-item">
+                    <h3>A10: Server-Side Request Forgery (SSRF)</h3>
+                    <p>L'application récupère des ressources distantes sans validation.</p>
+                    <strong>Solution:</strong> Whitelist d'URLs, validation des entrées.
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h4>Ressources d'apprentissage:</h4>
+                <ul>
+                    <li><a href="https://owasp.org/www-project-top-ten/" target="_blank">OWASP Top 10 Official</a></li>
+                    <li><a href="https://portswigger.net/web-security" target="_blank">PortSwigger Academy</a></li>
+                    <li><a href="https://www.hacksplaining.com/" target="_blank">Hacksplaining</a></li>
+                    <li><a href="https://application.security/" target="_blank">Application Security</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
