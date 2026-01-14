@@ -156,11 +156,11 @@
                 <pre>function sanitizeHTML(str) {
   return str
     .replace(/&/g, '&amp;')
-    .replace(/&lt;/g, '&amp;lt;')
-    .replace(/>/g, '&amp;gt;')
-    .replace(/"/g, '&amp;quot;')
-    .replace(/'/g, '&amp;#x27;')
-    .replace(/\//g, '&amp;#x2F;');
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;');
 }</pre>
             </div>
         </section>

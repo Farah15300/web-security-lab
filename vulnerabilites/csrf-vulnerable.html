@@ -179,7 +179,9 @@
             resultDiv.style.display = 'block';
             resultDiv.style.background = '#d4edda';
             resultDiv.style.color = '#155724';
-            resultDiv.innerHTML = `✅ Transfert de ${amount}€ effectué vers ${to}<br>Nouveau solde: ${balance}€`;
+            // Escape HTML to avoid XSS confusion with CSRF demo
+            const escapedTo = to.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            resultDiv.innerHTML = `✅ Transfert de ${amount}€ effectué vers ${escapedTo}<br>Nouveau solde: ${balance}€`;
             
             // Enregistrer dans l'historique
             let history = JSON.parse(localStorage.getItem('transfer_history') || '[]');
