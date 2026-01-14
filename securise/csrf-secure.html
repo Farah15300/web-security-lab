@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protection CSRF - Sécurisé</title>
+    <link rel="stylesheet" href="../public/styles.css">
+    <style>
+        .success-box {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            color: #155724;
+        }
+        .test-area {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .form-group {
+            margin: 10px 0;
+        }
+        .form-group label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+        }
+        .form-group input {
+            padding: 8px;
+            width: 300px;
+        }
+        .token-display {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .comparison > div {
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .vulnerable {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+        }
+        .secure {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✅ Protection CSRF - Version Sécurisée</h1>
+            <p><a href="../public/index.html">← Retour au menu principal</a> | <a href="../vulnerabilites/csrf-vulnerable.html">Voir la version vulnérable</a></p>
+        </header>
+
+        <div class="success-box">
+            <h2>✅ Cette page est PROTÉGÉE contre CSRF</h2>
+            <p><strong>Utilisation de tokens CSRF et validation de l'origine des requêtes.</strong></p>
+        </div>
+
+        <section>
+            <h2>Protections Implémentées</h2>
+            <ul>
+                <li>✅ Token CSRF unique par session</li>
+                <li>✅ Validation du token pour chaque requête sensible</li>
+                <li>✅ Token avec expiration temporelle</li>
+                <li>✅ Vérification de l'origine de la requête</li>
+                <li>✅ SameSite cookie attribute</li>
+                <li>✅ Double Submit Cookie pattern</li>
+            </ul>
+        </section>
+
+        <div class="test-area">
+            <h3>Simulation: Transfert Bancaire (SÉCURISÉ)</h3>
+            <p><strong>Scénario:</strong> Vous êtes connecté à votre banque en ligne.</p>
+            
+            <div class="form-group">
+                <label>Solde actuel:</label>
+                <span id="balance" style="font-size:1.2em; font-weight:bold;">1000€</span>
+            </div>
+            
+            <div class="success-box">
+                <strong>🔑 Token CSRF de session:</strong>
+                <div class="token-display" id="csrf-token-display"></div>
+                <small>Ce token est vérifié à chaque requête sensible</small>
+            </div>
+            
+            <form id="secure-transfer-form">
+                <div class="form-group">
+                    <label for="to">Destinataire:</label>
+                    <input type="text" id="to" name="to" placeholder="Compte destinataire" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="amount">Montant:</label>
+                    <input type="number" id="amount" name="amount" placeholder="Montant en €" required>
+                </div>
+                
+                <!-- Token CSRF caché dans le formulaire -->
+                <input type="hidden" id="csrf-token" name="csrf-token">
+                
+                <div class="form-group">
+                    <label></label>
+                    <button type="submit">💸 Transférer (Sécurisé)</button>
+                </div>
+            </form>
+            
+            <div id="transfer-result" style="margin-top:20px; padding:10px; display:none;"></div>
+        </div>
+
+        <div class="comparison">
+            <div class="vulnerable">
+                <h3>❌ Sans Protection</h3>
+                <pre>// Accepte toutes les requêtes
+fetch('/transfer', {
+  method: 'POST',
+  body: JSON.stringify({to, amount})
+});</pre>
+            </div>
+            <div class="secure">
+                <h3>✅ Avec Protection CSRF</h3>
+                <pre>// Requiert un token valide
+fetch('/transfer', {
+  method: 'POST',
+  headers: {
+    'X-CSRF-Token': token
+  },
+  body: JSON.stringify({to, amount})
+});</pre>
+            </div>
+        </div>
+
+        <div class="test-area">
+            <h3>Test: Simulation d'Attaque CSRF</h3>
+            <p>Essayons de simuler une attaque CSRF sans token valide:</p>
+            <button onclick="simulateAttackWithoutToken()">🎯 Attaque sans token</button>
+            <button onclick="simulateAttackWithWrongToken()">🎯 Attaque avec mauvais token</button>
+            <div id="attack-result" style="margin-top:10px; padding:10px; display:none;"></div>
+        </div>
+
+        <section>
+            <h2>Comment fonctionne la protection?</h2>
+            <ol>
+                <li><strong>Génération du token:</strong> Un token unique est créé pour chaque session</li>
+                <li><strong>Inclusion dans les formulaires:</strong> Le token est ajouté comme champ caché</li>
+                <li><strong>Validation côté serveur:</strong> Chaque requête sensible vérifie le token</li>
+                <li><strong>Rejet des requêtes invalides:</strong> Sans token valide, la requête est refusée</li>
+                <li><strong>Expiration:</strong> Les tokens ont une durée de vie limitée</li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>Autres Techniques de Protection</h2>
+            <div class="test-area">
+                <h4>1. SameSite Cookies</h4>
+                <pre style="background:#f4f4f4; padding:10px; border-radius:4px;">Set-Cookie: sessionId=abc123; SameSite=Strict; Secure; HttpOnly</pre>
+                
+                <h4>2. Vérification Origin/Referer</h4>
+                <pre style="background:#f4f4f4; padding:10px; border-radius:4px;">if (request.headers.origin !== 'https://bank.com') {
+  return 403; // Forbidden
+}</pre>
+                
+                <h4>3. Custom Headers</h4>
+                <pre style="background:#f4f4f4; padding:10px; border-radius:4px;">headers: {
+  'X-Requested-With': 'XMLHttpRequest',
+  'X-CSRF-Token': token
+}</pre>
+                
+                <h4>4. Double Submit Cookie</h4>
+                <pre style="background:#f4f4f4; padding:10px; border-radius:4px;">// Token dans cookie + dans requête
+// Serveur vérifie qu'ils correspondent</pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>Implémentation Serveur (Node.js exemple)</h2>
+            <pre style="background:#f4f4f4; padding:15px; border-radius:4px; overflow-x:auto;"><code>const csrf = require('csurf');
+
+// Middleware CSRF
+app.use(csrf({ cookie: true }));
+
+// Route protégée
+app.post('/transfer', (req, res) => {
+  // Le middleware vérifie automatiquement le token
+  // Si invalide, retourne 403
+  
+  const { to, amount } = req.body;
+  // Traiter le transfert...
+  res.json({ success: true });
+});</code></pre>
+        </section>
+    </div>
+
+    <script>
+        // Code SÉCURISÉ - Protection CSRF
+
+        let balance = 1000;
+        let csrfToken = null;
+        let tokenExpiry = null;
+
+        // Générer un token CSRF
+        function generateCSRFToken() {
+            // En production, ce serait généré côté serveur
+            const array = new Uint8Array(32);
+            crypto.getRandomValues(array);
+            const token = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+            
+            // Token expire après 30 minutes
+            const expiry = Date.now() + (30 * 60 * 1000);
+            
+            return { token, expiry };
+        }
+
+        // Initialiser le token
+        function initCSRFToken() {
+            const tokenData = generateCSRFToken();
+            csrfToken = tokenData.token;
+            tokenExpiry = tokenData.expiry;
+            
+            // Afficher le token (tronqué)
+            document.getElementById('csrf-token-display').textContent = 
+                csrfToken.substring(0, 16) + '...' + csrfToken.substring(csrfToken.length - 16);
+            
+            // Injecter dans le formulaire
+            document.getElementById('csrf-token').value = csrfToken;
+        }
+
+        // Valider le token CSRF
+        function validateCSRFToken(token) {
+            // Vérifier que le token existe
+            if (!token || !csrfToken) {
+                return { valid: false, reason: 'Token manquant' };
+            }
+            
+            // Vérifier que le token correspond
+            if (token !== csrfToken) {
+                return { valid: false, reason: 'Token invalide' };
+            }
+            
+            // Vérifier que le token n\'est pas expiré
+            if (Date.now() > tokenExpiry) {
+                return { valid: false, reason: 'Token expiré' };
+            }
+            
+            return { valid: true };
+        }
+
+        // Mettre à jour l'affichage du solde
+        function updateBalance() {
+            document.getElementById('balance').textContent = balance + '€';
+        }
+
+        // Formulaire de transfert sécurisé
+        document.getElementById('secure-transfer-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const to = document.getElementById('to').value;
+            const amount = parseInt(document.getElementById('amount').value);
+            const token = document.getElementById('csrf-token').value;
+            const resultDiv = document.getElementById('transfer-result');
+            
+            // ✅ SÉCURISÉ: Validation du token CSRF
+            const validation = validateCSRFToken(token);
+            
+            if (!validation.valid) {
+                resultDiv.style.display = 'block';
+                resultDiv.style.background = '#f8d7da';
+                resultDiv.style.color = '#721c24';
+                resultDiv.innerHTML = `❌ Requête refusée: ${validation.reason}<br><small>Protection CSRF activée</small>`;
+                return;
+            }
+            
+            // Vérifier le solde
+            if (amount > balance) {
+                resultDiv.style.display = 'block';
+                resultDiv.style.background = '#f8d7da';
+                resultDiv.style.color = '#721c24';
+                resultDiv.textContent = '❌ Solde insuffisant';
+                return;
+            }
+            
+            // Effectuer le transfert
+            balance -= amount;
+            updateBalance();
+            
+            resultDiv.style.display = 'block';
+            resultDiv.style.background = '#d4edda';
+            resultDiv.style.color = '#155724';
+            resultDiv.innerHTML = `✅ Transfert sécurisé de ${amount}€ effectué vers ${to}<br>Nouveau solde: ${balance}€<br><small>Token CSRF validé</small>`;
+            
+            // Régénérer un nouveau token après utilisation
+            initCSRFToken();
+            
+            // Réinitialiser le formulaire
+            document.getElementById('secure-transfer-form').reset();
+            document.getElementById('csrf-token').value = csrfToken;
+        });
+
+        // Simulation d'attaque sans token
+        function simulateAttackWithoutToken() {
+            const attackDiv = document.getElementById('attack-result');
+            
+            attackDiv.style.display = 'block';
+            attackDiv.style.background = '#fff3cd';
+            attackDiv.innerHTML = '⏳ Tentative d\'attaque CSRF sans token...';
+            
+            setTimeout(() => {
+                const validation = validateCSRFToken(null);
+                
+                attackDiv.style.background = '#d4edda';
+                attackDiv.style.color = '#155724';
+                attackDiv.innerHTML = `
+                    <strong>✅ ATTAQUE BLOQUÉE!</strong><br>
+                    Raison: ${validation.reason}<br>
+                    La protection CSRF a empêché le transfert non autorisé.
+                `;
+            }, 1000);
+        }
+
+        // Simulation d'attaque avec mauvais token
+        function simulateAttackWithWrongToken() {
+            const attackDiv = document.getElementById('attack-result');
+            
+            attackDiv.style.display = 'block';
+            attackDiv.style.background = '#fff3cd';
+            attackDiv.innerHTML = '⏳ Tentative d\'attaque CSRF avec faux token...';
+            
+            setTimeout(() => {
+                const fakeToken = 'attacker-forged-token-123456789';
+                const validation = validateCSRFToken(fakeToken);
+                
+                attackDiv.style.background = '#d4edda';
+                attackDiv.style.color = '#155724';
+                attackDiv.innerHTML = `
+                    <strong>✅ ATTAQUE BLOQUÉE!</strong><br>
+                    Raison: ${validation.reason}<br>
+                    Token fourni: ${fakeToken.substring(0, 20)}...<br>
+                    La protection CSRF a détecté le token forgé.
+                `;
+            }, 1000);
+        }
+
+        // Initialisation
+        window.onload = function() {
+            initCSRFToken();
+            updateBalance();
+        };
+    </script>
+</body>
+</html>

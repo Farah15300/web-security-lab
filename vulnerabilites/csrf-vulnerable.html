@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulnérabilités - CSRF</title>
+    <link rel="stylesheet" href="../public/styles.css">
+    <style>
+        .danger-box {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            color: #721c24;
+        }
+        .test-area {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .form-group {
+            margin: 10px 0;
+        }
+        .form-group label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+        }
+        .form-group input {
+            padding: 8px;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚠️ CSRF - Cross-Site Request Forgery (VULNÉRABLE)</h1>
+            <p><a href="../public/index.html">← Retour au menu principal</a> | <a href="../securise/csrf-secure.html">Voir la version sécurisée →</a></p>
+        </header>
+
+        <div class="danger-box">
+            <h2>⚠️ AVERTISSEMENT</h2>
+            <p><strong>Cette page est VOLONTAIREMENT vulnérable à des fins éducatives.</strong></p>
+            <p>Ne jamais implémenter ce code en production!</p>
+        </div>
+
+        <section>
+            <h2>Qu'est-ce que CSRF?</h2>
+            <p>Cross-Site Request Forgery (CSRF) est une attaque qui force un utilisateur authentifié à effectuer une action non désirée sur une application web.</p>
+            <p>L'attaquant exploite la confiance qu'une application a envers le navigateur de l'utilisateur.</p>
+        </section>
+
+        <div class="test-area">
+            <h3>Simulation: Transfert Bancaire (VULNÉRABLE)</h3>
+            <p><strong>Scénario:</strong> Vous êtes connecté à votre banque en ligne.</p>
+            
+            <div class="form-group">
+                <label>Solde actuel:</label>
+                <span id="balance" style="font-size:1.2em; font-weight:bold;">1000€</span>
+            </div>
+            
+            <form id="vulnerable-transfer-form">
+                <div class="form-group">
+                    <label for="to">Destinataire:</label>
+                    <input type="text" id="to" name="to" placeholder="Compte destinataire">
+                </div>
+                
+                <div class="form-group">
+                    <label for="amount">Montant:</label>
+                    <input type="number" id="amount" name="amount" placeholder="Montant en €">
+                </div>
+                
+                <div class="form-group">
+                    <label></label>
+                    <button type="submit">💸 Transférer</button>
+                </div>
+            </form>
+            
+            <div id="transfer-result" style="margin-top:20px; padding:10px; display:none;"></div>
+        </div>
+
+        <section>
+            <h2>Comment fonctionne l'attaque?</h2>
+            <ol>
+                <li>La victime est connectée à son site bancaire (authentifiée)</li>
+                <li>L'attaquant envoie un lien malveillant à la victime</li>
+                <li>Le lien contient une requête de transfert forgée</li>
+                <li>Puisque la victime est authentifiée, la requête est exécutée</li>
+                <li>L'argent est transféré sans le consentement de la victime</li>
+            </ol>
+        </section>
+
+        <div class="test-area">
+            <h3>Exemples d'Attaques CSRF</h3>
+            
+            <h4>1. Via une image cachée:</h4>
+            <pre style="background:#f4f4f4; padding:10px; border-radius:4px; overflow-x:auto;"><code>&lt;img src="https://bank.com/transfer?to=attacker&amount=1000" style="display:none"&gt;</code></pre>
+            
+            <h4>2. Via un formulaire auto-submit:</h4>
+            <pre style="background:#f4f4f4; padding:10px; border-radius:4px; overflow-x:auto;"><code>&lt;form action="https://bank.com/transfer" method="POST"&gt;
+  &lt;input type="hidden" name="to" value="attacker"&gt;
+  &lt;input type="hidden" name="amount" value="1000"&gt;
+&lt;/form&gt;
+&lt;script&gt;document.forms[0].submit();&lt;/script&gt;</code></pre>
+            
+            <h4>3. Via fetch/AJAX:</h4>
+            <pre style="background:#f4f4f4; padding:10px; border-radius:4px; overflow-x:auto;"><code>fetch('https://bank.com/transfer', {
+  method: 'POST',
+  body: JSON.stringify({to: 'attacker', amount: 1000})
+});</code></pre>
+        </div>
+
+        <section>
+            <h2>Pourquoi c'est dangereux?</h2>
+            <ul>
+                <li>💸 Transferts d'argent non autorisés</li>
+                <li>🔐 Changement de mot de passe</li>
+                <li>📧 Changement d'email</li>
+                <li>🗑️ Suppression de données</li>
+                <li>👥 Actions sur les réseaux sociaux (posts, likes, follows)</li>
+                <li>⚙️ Modification de paramètres</li>
+            </ul>
+        </section>
+
+        <div class="test-area">
+            <h3>Démonstration Pratique</h3>
+            <p>Cliquez sur ce bouton pour simuler une attaque CSRF:</p>
+            <button onclick="simulateAttack()">🎯 Simuler une attaque CSRF</button>
+            <div id="attack-result" style="margin-top:10px; padding:10px; display:none;"></div>
+        </div>
+
+        <div class="danger-box">
+            <h3>🛡️ Comment se protéger?</h3>
+            <p>Voir la <a href="../securise/csrf-secure.html">version sécurisée</a> pour les solutions!</p>
+        </div>
+    </div>
+
+    <script>
+        // Code VOLONTAIREMENT VULNÉRABLE - À NE PAS UTILISER EN PRODUCTION
+
+        let balance = 1000;
+
+        // Mettre à jour l'affichage du solde
+        function updateBalance() {
+            document.getElementById('balance').textContent = balance + '€';
+        }
+
+        // Formulaire de transfert vulnérable
+        document.getElementById('vulnerable-transfer-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const to = document.getElementById('to').value;
+            const amount = parseInt(document.getElementById('amount').value);
+            const resultDiv = document.getElementById('transfer-result');
+            
+            if (!to || !amount) {
+                alert('Veuillez remplir tous les champs');
+                return;
+            }
+            
+            // ❌ VULNÉRABLE: Pas de vérification CSRF token
+            // La requête est acceptée sans vérifier son origine
+            
+            if (amount > balance) {
+                resultDiv.style.display = 'block';
+                resultDiv.style.background = '#f8d7da';
+                resultDiv.style.color = '#721c24';
+                resultDiv.textContent = '❌ Solde insuffisant';
+                return;
+            }
+            
+            // Effectuer le transfert
+            balance -= amount;
+            updateBalance();
+            
+            resultDiv.style.display = 'block';
+            resultDiv.style.background = '#d4edda';
+            resultDiv.style.color = '#155724';
+            resultDiv.innerHTML = `✅ Transfert de ${amount}€ effectué vers ${to}<br>Nouveau solde: ${balance}€`;
+            
+            // Enregistrer dans l'historique
+            let history = JSON.parse(localStorage.getItem('transfer_history') || '[]');
+            history.push({
+                to: to,
+                amount: amount,
+                date: new Date().toLocaleString(),
+                vulnerable: true
+            });
+            localStorage.setItem('transfer_history', JSON.stringify(history));
+            
+            // Réinitialiser le formulaire
+            document.getElementById('vulnerable-transfer-form').reset();
+        });
+
+        // Simulation d'attaque CSRF
+        function simulateAttack() {
+            const attackDiv = document.getElementById('attack-result');
+            
+            attackDiv.style.display = 'block';
+            attackDiv.style.background = '#fff3cd';
+            attackDiv.style.color = '#856404';
+            attackDiv.innerHTML = '⏳ Attaque CSRF en cours...<br>L\'attaquant forge une requête de transfert...';
+            
+            setTimeout(() => {
+                // Simuler une requête forgée par l'attaquant
+                const forgedTo = 'attacker-account-12345';
+                const forgedAmount = 500;
+                
+                if (forgedAmount <= balance) {
+                    balance -= forgedAmount;
+                    updateBalance();
+                    
+                    attackDiv.style.background = '#f8d7da';
+                    attackDiv.style.color = '#721c24';
+                    attackDiv.innerHTML = `
+                        <strong>⚠️ ATTAQUE CSRF RÉUSSIE!</strong><br>
+                        ${forgedAmount}€ ont été transférés vers ${forgedTo}<br>
+                        Nouveau solde: ${balance}€<br><br>
+                        <small>La victime n'a rien vu et n'a pas donné son consentement!</small>
+                    `;
+                    
+                    // Enregistrer dans l'historique
+                    let history = JSON.parse(localStorage.getItem('transfer_history') || '[]');
+                    history.push({
+                        to: forgedTo,
+                        amount: forgedAmount,
+                        date: new Date().toLocaleString(),
+                        vulnerable: true,
+                        attack: true
+                    });
+                    localStorage.setItem('transfer_history', JSON.stringify(history));
+                } else {
+                    attackDiv.style.background = '#d4edda';
+                    attackDiv.innerHTML = '✅ Attaque échouée: solde insuffisant';
+                }
+            }, 1500);
+        }
+
+        // Initialiser le solde
+        updateBalance();
+    </script>
+</body>
+</html>

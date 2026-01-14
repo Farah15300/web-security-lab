@@ -7,7 +7,9 @@ function showModule(moduleName) {
     buttons.forEach(b => b.classList.remove('active'));
     
     document.getElementById(moduleName).classList.add('active');
-    event.target.classList.add('active');
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
 }
 
 // ============ PERMISSIONS NAVIGATEUR ============

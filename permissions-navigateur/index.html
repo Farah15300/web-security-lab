@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permissions Navigateur - Laboratoire</title>
+    <link rel="stylesheet" href="../public/styles.css">
+    <style>
+        .demo-box {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        video {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .permission-status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .granted { background: #d4edda; color: #155724; }
+        .denied { background: #f8d7da; color: #721c24; }
+        .prompt { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 Permissions du Navigateur</h1>
+            <p><a href="../public/index.html">← Retour au menu principal</a></p>
+        </header>
+
+        <div class="demo-box">
+            <h2>📹 Permission Caméra</h2>
+            <p>Démonstration de l'accès à la caméra avec permission explicite.</p>
+            <button onclick="requestCamera()" id="camera-btn">Demander la Caméra</button>
+            <button onclick="stopCamera()" id="stop-camera-btn" style="display:none;">Arrêter la Caméra</button>
+            <div id="camera-status" class="permission-status" style="display:none;"></div>
+            <video id="camera-video" autoplay playsinline style="display:none;"></video>
+        </div>
+
+        <div class="demo-box">
+            <h2>🎤 Permission Microphone</h2>
+            <p>Démonstration de l'accès au microphone.</p>
+            <button onclick="requestMicrophone()">Demander le Microphone</button>
+            <button onclick="stopMicrophone()" id="stop-mic-btn" style="display:none;">Arrêter le Microphone</button>
+            <div id="mic-status" class="permission-status" style="display:none;"></div>
+            <canvas id="audio-visualizer" width="600" height="100" style="display:none; border: 1px solid #ccc; margin-top: 10px;"></canvas>
+        </div>
+
+        <div class="demo-box">
+            <h2>📍 Géolocalisation</h2>
+            <p>Démonstration de l'accès à la position géographique.</p>
+            <button onclick="requestLocation()">Demander la Position</button>
+            <div id="location-status" class="permission-status" style="display:none;"></div>
+            <div id="location-info" style="margin-top: 10px;"></div>
+        </div>
+
+        <div class="demo-box">
+            <h2>🔔 Notifications</h2>
+            <p>Démonstration des notifications push.</p>
+            <button onclick="requestNotifications()">Demander les Notifications</button>
+            <button onclick="sendTestNotification()" id="send-notif-btn" style="display:none;">Envoyer une Notification Test</button>
+            <div id="notification-status" class="permission-status" style="display:none;"></div>
+        </div>
+
+        <div class="demo-box">
+            <h2>💾 Stockage Local</h2>
+            <p>Démonstration du stockage de données local.</p>
+            <input type="text" id="storage-key" placeholder="Clé">
+            <input type="text" id="storage-value" placeholder="Valeur">
+            <button onclick="saveToStorage()">Sauvegarder</button>
+            <button onclick="loadFromStorage()">Charger</button>
+            <button onclick="clearStorage()">Effacer</button>
+            <div id="storage-status" style="margin-top: 10px;"></div>
+        </div>
+    </div>
+
+    <script src="permissions.js"></script>
+</body>
+</html>
