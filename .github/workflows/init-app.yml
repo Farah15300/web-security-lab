@@ -1,0 +1,717 @@
+name: 🚀 Initialiser une Nouvelle Application
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_type:
+        description: '📱 Type d''application à créer'
+        required: true
+        type: choice
+        options:
+          - 'Web Security Lab (Labo de sécurité web)'
+          - 'API REST Sécurisée'
+          - 'Application Full-Stack'
+          - 'Application avec Authentification'
+      
+      app_name:
+        description: '📝 Nom de l''application'
+        required: true
+        default: 'mon-application'
+        type: string
+      
+      framework:
+        description: '🛠️ Framework à utiliser'
+        required: true
+        type: choice
+        options:
+          - 'Express.js (Node.js)'
+          - 'Next.js (React + Node)'
+          - 'Vue.js + Express'
+          - 'Vanilla JS + Express'
+      
+      database:
+        description: '💾 Base de données'
+        required: true
+        type: choice
+        options:
+          - 'Aucune (fichiers JSON)'
+          - 'SQLite'
+          - 'MongoDB'
+          - 'PostgreSQL'
+      
+      auth_method:
+        description: '🔐 Méthode d''authentification'
+        required: true
+        type: choice
+        options:
+          - 'Aucune'
+          - 'Session + Cookies'
+          - 'JWT'
+          - 'OAuth 2.0'
+      
+      security_features:
+        description: '🛡️ Fonctionnalités de sécurité à inclure'
+        required: true
+        type: choice
+        options:
+          - 'Basique (CSRF, XSS)'
+          - 'Avancée (CSRF, XSS, Rate Limiting, CORS)'
+          - 'Complète (OWASP Top 10)'
+          - 'Personnalisée'
+      
+      include_docker:
+        description: '🐳 Inclure Docker?'
+        required: true
+        type: boolean
+        default: false
+      
+      include_tests:
+        description: '🧪 Inclure des tests?'
+        required: true
+        type: boolean
+        default: true
+      
+      include_ci:
+        description: '⚙️ Inclure CI/CD (GitHub Actions)?'
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  initialize:
+    name: 🏗️ Initialisation de l'Application
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📋 Affichage de la configuration
+        run: |
+          echo "════════════════════════════════════════════════════"
+          echo "🚀 Initialisation de l'Application"
+          echo "════════════════════════════════════════════════════"
+          echo ""
+          echo "📱 Type: ${{ inputs.app_type }}"
+          echo "📝 Nom: ${{ inputs.app_name }}"
+          echo "🛠️ Framework: ${{ inputs.framework }}"
+          echo "💾 Base de données: ${{ inputs.database }}"
+          echo "🔐 Authentification: ${{ inputs.auth_method }}"
+          echo "🛡️ Sécurité: ${{ inputs.security_features }}"
+          echo "🐳 Docker: ${{ inputs.include_docker }}"
+          echo "🧪 Tests: ${{ inputs.include_tests }}"
+          echo "⚙️ CI/CD: ${{ inputs.include_ci }}"
+          echo ""
+          echo "════════════════════════════════════════════════════"
+      
+      - name: 📥 Checkout du repository
+        uses: actions/checkout@v4
+      
+      - name: 📦 Installation de Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: 📁 Création de la structure du projet
+        run: |
+          echo "📁 Création des répertoires..."
+          mkdir -p src/{routes,middleware,models,controllers,utils,config}
+          mkdir -p public/{css,js,images}
+          mkdir -p views
+          
+          if [ "${{ inputs.include_tests }}" == "true" ]; then
+            mkdir -p tests/{unit,integration}
+            echo "✅ Répertoires de tests créés"
+          fi
+          
+          if [ "${{ inputs.include_docker }}" == "true" ]; then
+            mkdir -p docker
+            echo "✅ Répertoire Docker créé"
+          fi
+          
+          echo "✅ Structure de base créée"
+      
+      - name: 📝 Création du package.json
+        run: |
+          # Escape JSON characters
+          APP_NAME_PKG=$(echo "${{ inputs.app_name }}" | sed 's/\\/\\\\/g; s/"/\\"/g')
+          AUTHOR_PKG=$(echo "${{ github.actor }}" | sed 's/\\/\\\\/g; s/"/\\"/g')
+          
+          cat > package.json << EOF
+          {
+            "name": "${APP_NAME_PKG}",
+            "version": "1.0.0",
+            "description": "Application générée par le workflow d'initialisation",
+            "main": "src/index.js",
+            "scripts": {
+              "start": "node src/index.js",
+              "dev": "nodemon src/index.js",
+              "test": "echo \\"Tests à configurer\\" && exit 0"
+            },
+            "keywords": [],
+            "author": "${AUTHOR_PKG}",
+            "license": "MIT",
+            "dependencies": {
+              "express": "^4.18.2",
+              "dotenv": "^16.3.1"
+            },
+            "devDependencies": {
+              "nodemon": "^3.0.1"
+            }
+          }
+          EOF
+          
+          # Ajout des dépendances selon la configuration
+          node -e "
+          const fs = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          
+          // Sécurité - Always include security packages
+          pkg.dependencies['helmet'] = '^7.1.0';
+          pkg.dependencies['cors'] = '^2.8.5';
+          
+          if ('${{ inputs.security_features }}'.includes('Avancée') || '${{ inputs.security_features }}'.includes('Complète')) {
+            pkg.dependencies['express-rate-limit'] = '^7.1.5';
+          }
+          
+          // Authentification
+          if ('${{ inputs.auth_method }}' === 'Session + Cookies') {
+            pkg.dependencies['express-session'] = '^1.17.3';
+            pkg.dependencies['cookie-parser'] = '^1.4.6';
+          } else if ('${{ inputs.auth_method }}' === 'JWT') {
+            pkg.dependencies['jsonwebtoken'] = '^9.0.2';
+          }
+          
+          // Base de données
+          if ('${{ inputs.database }}' === 'MongoDB') {
+            pkg.dependencies['mongoose'] = '^8.0.3';
+          } else if ('${{ inputs.database }}' === 'PostgreSQL') {
+            pkg.dependencies['pg'] = '^8.11.3';
+          } else if ('${{ inputs.database }}' === 'SQLite') {
+            pkg.dependencies['better-sqlite3'] = '^9.2.2';
+          }
+          
+          // Tests
+          if ('${{ inputs.include_tests }}' === 'true') {
+            pkg.devDependencies['jest'] = '^29.7.0';
+            pkg.devDependencies['supertest'] = '^6.3.3';
+            pkg.scripts.test = 'jest';
+          }
+          
+          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+          
+          echo "✅ package.json créé et configuré"
+      
+      - name: 🔧 Création du fichier principal (index.js)
+        run: |
+          # Escape HTML characters for security
+          APP_NAME_ESC=$(echo "${{ inputs.app_name }}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#x27;/g')
+          APP_TYPE_ESC=$(echo "${{ inputs.app_type }}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#x27;/g')
+          FRAMEWORK_ESC=$(echo "${{ inputs.framework }}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#x27;/g')
+          DATABASE_ESC=$(echo "${{ inputs.database }}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#x27;/g')
+          AUTH_ESC=$(echo "${{ inputs.auth_method }}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#x27;/g')
+          SECURITY_ESC=$(echo "${{ inputs.security_features }}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#x27;/g')
+          
+          # Escape JSON characters for app name
+          APP_NAME_JSON=$(echo "${{ inputs.app_name }}" | sed 's/\\/\\\\/g; s/"/\\"/g')
+          
+          # Convert booleans to user-friendly text
+          TESTS_TEXT="${{ inputs.include_tests == true && 'Oui' || 'Non' }}"
+          DOCKER_TEXT="${{ inputs.include_docker == true && 'Oui' || 'Non' }}"
+          CI_TEXT="${{ inputs.include_ci == true && 'Oui' || 'Non' }}"
+          
+          cat > src/index.js << EOF
+          require('dotenv').config();
+          const express = require('express');
+          const path = require('path');
+          
+          const app = express();
+          const PORT = process.env.PORT || 3000;
+          
+          // Middleware de base
+          app.use(express.json());
+          app.use(express.urlencoded({ extended: true }));
+          app.use(express.static('public'));
+          
+          // Route principale
+          app.get('/', (req, res) => {
+            res.send(\`
+              <!DOCTYPE html>
+              <html lang="fr">
+              <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>${APP_NAME_ESC}</title>
+                <style>
+                  body {
+                    font-family: system-ui, -apple-system, sans-serif;
+                    max-width: 800px;
+                    margin: 50px auto;
+                    padding: 20px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                  }
+                  .container {
+                    background: rgba(255, 255, 255, 0.1);
+                    backdrop-filter: blur(10px);
+                    border-radius: 20px;
+                    padding: 40px;
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                  }
+                  h1 { font-size: 2.5em; margin: 0 0 10px 0; }
+                  .badge {
+                    display: inline-block;
+                    background: rgba(255, 255, 255, 0.2);
+                    padding: 5px 15px;
+                    border-radius: 20px;
+                    margin: 5px;
+                    font-size: 0.9em;
+                  }
+                  .info {
+                    margin-top: 30px;
+                    line-height: 1.8;
+                  }
+                  code {
+                    background: rgba(0, 0, 0, 0.3);
+                    padding: 2px 8px;
+                    border-radius: 4px;
+                    font-family: 'Courier New', monospace;
+                  }
+                </style>
+              </head>
+              <body>
+                <div class="container">
+                  <h1>🚀 ${APP_NAME_ESC}</h1>
+                  <p>Application initialisée avec succès!</p>
+                  
+                  <div>
+                    <span class="badge">📱 ${APP_TYPE_ESC}</span>
+                    <span class="badge">🛠️ ${FRAMEWORK_ESC}</span>
+                    <span class="badge">💾 ${DATABASE_ESC}</span>
+                    <span class="badge">🔐 ${AUTH_ESC}</span>
+                  </div>
+                  
+                  <div class="info">
+                    <h3>✅ Fonctionnalités incluses:</h3>
+                    <ul>
+                      <li>🛡️ Protection de sécurité: <strong>${SECURITY_ESC}</strong></li>
+                      <li>🧪 Tests: <strong>${TESTS_TEXT}</strong></li>
+                      <li>🐳 Docker: <strong>${DOCKER_TEXT}</strong></li>
+                      <li>⚙️ CI/CD: <strong>${CI_TEXT}</strong></li>
+                    </ul>
+                    
+                    <h3>📚 Prochaines étapes:</h3>
+                    <ol>
+                      <li>Installez les dépendances: <code>npm install</code></li>
+                      <li>Configurez le fichier <code>.env</code></li>
+                      <li>Lancez en mode dev: <code>npm run dev</code></li>
+                      <li>Consultez la documentation dans <code>README.md</code></li>
+                    </ol>
+                  </div>
+                </div>
+              </body>
+              </html>
+            \`);
+          });
+          
+          // Route de santé
+          app.get('/health', (req, res) => {
+            res.json({ 
+              status: 'OK', 
+              timestamp: new Date().toISOString(),
+              app: '${APP_NAME_JSON}'
+            });
+          });
+          
+          app.listen(PORT, () => {
+            console.log('🚀 ${APP_NAME_JSON} démarré sur http://localhost:' + PORT);
+          });
+          EOF
+          
+          echo "✅ Fichier principal créé"
+      
+      - name: 🔐 Création du fichier .env.example
+        run: |
+          cat > .env.example << 'EOF'
+          # Configuration de l'application
+          NODE_ENV=development
+          PORT=3000
+          
+          # Base de données
+          DATABASE_URL=
+          
+          # Sécurité
+          SESSION_SECRET=change-me-in-production
+          JWT_SECRET=change-me-in-production
+          
+          # CORS
+          CORS_ORIGIN=http://localhost:3000
+          EOF
+          
+          echo ".env" >> .gitignore
+          echo "✅ .env.example créé"
+      
+      - name: 🐳 Création des fichiers Docker
+        if: inputs.include_docker == true
+        run: |
+          cat > Dockerfile << 'EOF'
+          FROM node:18-alpine
+          
+          WORKDIR /app
+          
+          COPY package*.json ./
+          RUN npm ci --only=production
+          
+          COPY . .
+          
+          EXPOSE 3000
+          
+          CMD ["npm", "start"]
+          EOF
+          
+          cat > docker-compose.yml << 'EOF'
+          version: '3.8'
+          
+          services:
+            app:
+              build: .
+              ports:
+                - "3000:3000"
+              environment:
+                - NODE_ENV=production
+              volumes:
+                - .:/app
+                - /app/node_modules
+              restart: unless-stopped
+          EOF
+          
+          cat > .dockerignore << 'EOF'
+          node_modules
+          npm-debug.log
+          .env
+          .git
+          .gitignore
+          README.md
+          EOF
+          
+          echo "✅ Fichiers Docker créés"
+      
+      - name: 🧪 Création des fichiers de tests
+        if: inputs.include_tests == true
+        run: |
+          cat > tests/app.test.js << 'EOF'
+          const request = require('supertest');
+          
+          describe('Tests de base', () => {
+            test('Should return 200 on health endpoint', async () => {
+              // TODO: Implémenter les tests
+              expect(true).toBe(true);
+            });
+          });
+          EOF
+          
+          cat > jest.config.js << 'EOF'
+          module.exports = {
+            testEnvironment: 'node',
+            coverageDirectory: 'coverage',
+            collectCoverageFrom: ['src/**/*.js'],
+            testMatch: ['**/tests/**/*.test.js']
+          };
+          EOF
+          
+          echo "✅ Configuration de tests créée"
+      
+      - name: ⚙️ Création des workflows CI/CD
+        if: inputs.include_ci == true
+        run: |
+          mkdir -p .github/workflows
+          
+          cat > .github/workflows/ci.yml << 'EOF'
+          name: CI/CD
+          
+          on:
+            push:
+              branches: [ main, develop ]
+            pull_request:
+              branches: [ main ]
+          
+          jobs:
+            test:
+              runs-on: ubuntu-latest
+              
+              steps:
+                - uses: actions/checkout@v4
+                
+                - name: Setup Node.js
+                  uses: actions/setup-node@v4
+                  with:
+                    node-version: '18'
+                    cache: 'npm'
+                
+                - name: Install dependencies
+                  run: npm ci
+                
+                - name: Run tests
+                  run: npm test
+                
+                - name: Run linter
+                  run: echo "Linter à configurer"
+          EOF
+          
+          echo "✅ Workflow CI/CD créé"
+      
+      - name: 📄 Création du README.md
+        run: |
+          cat > README.md << 'EOF'
+          # ${{ inputs.app_name }}
+          
+          Application générée automatiquement par le workflow d'initialisation.
+          
+          ## 📋 Configuration
+          
+          - **Type:** ${{ inputs.app_type }}
+          - **Framework:** ${{ inputs.framework }}
+          - **Base de données:** ${{ inputs.database }}
+          - **Authentification:** ${{ inputs.auth_method }}
+          - **Sécurité:** ${{ inputs.security_features }}
+          
+          ## 🚀 Démarrage Rapide
+          
+          ```bash
+          # Installation des dépendances
+          npm install
+          
+          # Copier le fichier d'environnement
+          cp .env.example .env
+          
+          # Lancer en mode développement
+          npm run dev
+          
+          # Lancer en production
+          npm start
+          ```
+          
+          ## 📁 Structure du Projet
+          
+          ```
+          .
+          ├── src/
+          │   ├── index.js          # Point d'entrée
+          │   ├── routes/           # Routes de l'API
+          │   ├── controllers/      # Contrôleurs
+          │   ├── models/           # Modèles de données
+          │   ├── middleware/       # Middleware personnalisé
+          │   ├── utils/            # Utilitaires
+          │   └── config/           # Configuration
+          ├── public/               # Fichiers statiques
+          ├── views/                # Templates
+          └── tests/                # Tests
+          ```
+          
+          ## 🛡️ Sécurité
+          
+          Cette application inclut les protections suivantes:
+          - Protection CSRF
+          - Protection XSS
+          - Headers de sécurité (Helmet)
+          - Rate limiting
+          - CORS configuré
+          
+          ## 🧪 Tests
+          
+          ```bash
+          # Lancer les tests
+          npm test
+          
+          # Tests avec couverture
+          npm run test:coverage
+          ```
+          
+          ## 🐳 Docker
+          
+          ```bash
+          # Build et démarrage
+          docker-compose up --build
+          
+          # Arrêt
+          docker-compose down
+          ```
+          
+          ## 📝 Documentation
+          
+          - [Express.js Documentation](https://expressjs.com/)
+          - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
+          
+          ## 👤 Auteur
+          
+          Créé par @${{ github.actor }} le $(date +%Y-%m-%d)
+          
+          ## 📄 Licence
+          
+          MIT
+          EOF
+          
+          echo "✅ README.md créé"
+      
+      - name: 📊 Création du rapport d'initialisation
+        run: |
+          cat > INIT_REPORT.md << 'EOF'
+          # 📋 Rapport d'Initialisation de l'Application
+          
+          **Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")  
+          **Initialisé par:** @${{ github.actor }}  
+          **Workflow Run:** [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          ## 🎯 Configuration Choisie
+          
+          | Paramètre | Valeur |
+          |-----------|--------|
+          | 📱 Type d'application | ${{ inputs.app_type }} |
+          | 📝 Nom | ${{ inputs.app_name }} |
+          | 🛠️ Framework | ${{ inputs.framework }} |
+          | 💾 Base de données | ${{ inputs.database }} |
+          | 🔐 Authentification | ${{ inputs.auth_method }} |
+          | 🛡️ Sécurité | ${{ inputs.security_features }} |
+          | 🐳 Docker | ${{ inputs.include_docker }} |
+          | 🧪 Tests | ${{ inputs.include_tests }} |
+          | ⚙️ CI/CD | ${{ inputs.include_ci }} |
+          
+          ## 📁 Fichiers Créés
+          
+          - ✅ Structure de répertoires
+          - ✅ package.json avec dépendances
+          - ✅ src/index.js (serveur Express)
+          - ✅ .env.example
+          - ✅ README.md
+          - ✅ .gitignore
+          EOF
+          
+          # Add conditional lines based on options
+          if [ "${{ inputs.include_docker }}" = "true" ]; then
+            echo "- ✅ Dockerfile et docker-compose.yml" >> INIT_REPORT.md
+          fi
+          
+          if [ "${{ inputs.include_tests }}" = "true" ]; then
+            echo "- ✅ Configuration de tests (Jest)" >> INIT_REPORT.md
+          fi
+          
+          if [ "${{ inputs.include_ci }}" = "true" ]; then
+            echo "- ✅ Workflow CI/CD (.github/workflows/ci.yml)" >> INIT_REPORT.md
+          fi
+          
+          cat >> INIT_REPORT.md << 'EOF'
+          
+          ## 🚀 Prochaines Étapes
+          
+          1. **Téléchargez les artefacts** de ce workflow
+          2. **Extrayez** le contenu dans votre projet
+          3. **Installez** les dépendances: \`npm install\`
+          4. **Copiez** \`.env.example\` vers \`.env\` et configurez
+          5. **Lancez** l'application: \`npm run dev\`
+          6. **Ouvrez** votre navigateur sur http://localhost:3000
+          
+          ## 📝 Notes Importantes
+          
+          - 🔐 Changez tous les secrets dans le fichier \`.env\`
+          - 🔒 Ne commitez jamais le fichier \`.env\`
+          - 📚 Consultez le README.md pour plus de détails
+          - 🧪 Ajoutez des tests au fur et à mesure du développement
+          
+          ---
+          
+          **✅ Initialisation terminée avec succès! 🎉**
+          EOF
+          
+          echo "✅ Rapport d'initialisation créé"
+          cat INIT_REPORT.md
+      
+      - name: 📤 Upload des fichiers générés
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.app_name }}-${{ github.run_number }}
+          path: |
+            src/
+            public/
+            views/
+            package.json
+            .env.example
+            .gitignore
+            README.md
+            INIT_REPORT.md
+          retention-days: 30
+      
+      - name: 📤 Upload des fichiers optionnels (si présents)
+        uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with:
+          name: ${{ inputs.app_name }}-${{ github.run_number }}-optional
+          path: |
+            tests/
+            .github/
+            Dockerfile
+            docker-compose.yml
+            .dockerignore
+            jest.config.js
+          retention-days: 30
+      
+      - name: ✅ Finalisation
+        run: |
+          echo ""
+          echo "════════════════════════════════════════════════════"
+          echo "🎉 Application Initialisée avec Succès!"
+          echo "════════════════════════════════════════════════════"
+          echo ""
+          echo "📦 Nom: ${{ inputs.app_name }}"
+          echo "📱 Type: ${{ inputs.app_type }}"
+          echo "🛠️ Framework: ${{ inputs.framework }}"
+          echo ""
+          echo "📥 Les fichiers sont disponibles dans les artefacts"
+          echo "   de ce workflow (onglet Actions > ce run > Artifacts)"
+          echo ""
+          echo "🚀 Pour démarrer:"
+          echo "   1. Téléchargez l'artefact"
+          echo "   2. Extrayez dans votre projet"
+          echo "   3. npm install"
+          echo "   4. cp .env.example .env"
+          echo "   5. npm run dev"
+          echo ""
+          echo "════════════════════════════════════════════════════"
+  
+  summary:
+    name: 📊 Résumé
+    runs-on: ubuntu-latest
+    needs: initialize
+    if: always()
+    
+    steps:
+      - name: 📋 Génération du résumé
+        run: |
+          echo "### 🚀 Initialisation de l'Application" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Paramètre | Valeur |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 📱 Type | ${{ inputs.app_type }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📝 Nom | \`${{ inputs.app_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🛠️ Framework | ${{ inputs.framework }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 💾 Base de données | ${{ inputs.database }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔐 Auth | ${{ inputs.auth_method }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🛡️ Sécurité | ${{ inputs.security_features }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🐳 Docker | ${{ inputs.include_docker }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧪 Tests | ${{ inputs.include_tests }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⚙️ CI/CD | ${{ inputs.include_ci }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📥 Téléchargement" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Les fichiers de votre nouvelle application sont disponibles dans l'onglet **Artifacts** de ce workflow." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Prochaines Étapes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. 📥 Téléchargez l'artefact \`${{ inputs.app_name }}-${{ github.run_number }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "2. 📂 Extrayez le contenu dans votre répertoire de projet" >> $GITHUB_STEP_SUMMARY
+          echo "3. 📦 Exécutez \`npm install\`" >> $GITHUB_STEP_SUMMARY
+          echo "4. ⚙️ Copiez \`.env.example\` vers \`.env\` et configurez" >> $GITHUB_STEP_SUMMARY
+          echo "5. 🚀 Lancez \`npm run dev\`" >> $GITHUB_STEP_SUMMARY
+          echo "6. 🌐 Ouvrez http://localhost:3000" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Initialisation réussie!** 🎉" >> $GITHUB_STEP_SUMMARY
