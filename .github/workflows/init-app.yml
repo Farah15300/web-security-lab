@@ -206,6 +206,14 @@ jobs:
           AUTH_ESC=$(echo "${{ inputs.auth_method }}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#x27;/g')
           SECURITY_ESC=$(echo "${{ inputs.security_features }}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#x27;/g')
           
+          # Escape JSON characters for app name
+          APP_NAME_JSON=$(echo "${{ inputs.app_name }}" | sed 's/\\/\\\\/g; s/"/\\"/g')
+          
+          # Convert booleans to user-friendly text
+          TESTS_TEXT="${{ inputs.include_tests == true && 'Oui' || 'Non' }}"
+          DOCKER_TEXT="${{ inputs.include_docker == true && 'Oui' || 'Non' }}"
+          CI_TEXT="${{ inputs.include_ci == true && 'Oui' || 'Non' }}"
+          
           cat > src/index.js << EOF
           require('dotenv').config();
           const express = require('express');
@@ -281,9 +289,9 @@ jobs:
                     <h3>✅ Fonctionnalités incluses:</h3>
                     <ul>
                       <li>🛡️ Protection de sécurité: <strong>${SECURITY_ESC}</strong></li>
-                      <li>🧪 Tests: <strong>${{ inputs.include_tests }}</strong></li>
-                      <li>🐳 Docker: <strong>${{ inputs.include_docker }}</strong></li>
-                      <li>⚙️ CI/CD: <strong>${{ inputs.include_ci }}</strong></li>
+                      <li>🧪 Tests: <strong>${TESTS_TEXT}</strong></li>
+                      <li>🐳 Docker: <strong>${DOCKER_TEXT}</strong></li>
+                      <li>⚙️ CI/CD: <strong>${CI_TEXT}</strong></li>
                     </ul>
                     
                     <h3>📚 Prochaines étapes:</h3>
@@ -305,12 +313,12 @@ jobs:
             res.json({ 
               status: 'OK', 
               timestamp: new Date().toISOString(),
-              app: '${{ inputs.app_name }}'
+              app: '${APP_NAME_JSON}'
             });
           });
           
           app.listen(PORT, () => {
-            console.log(\\\`🚀 ${{ inputs.app_name }} démarré sur http://localhost:\\\${PORT}\\\`);
+            console.log(\\\`🚀 ${APP_NAME_JSON} démarré sur http://localhost:\\\${PORT}\\\`);
           });
           EOF
           
