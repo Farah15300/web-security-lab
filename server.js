@@ -19,6 +19,10 @@ app.use(session({
 
 // Servir les fichiers statiques
 app.use(express.static('public'));
+app.use('/permissions-navigateur', express.static('permissions-navigateur'));
+app.use('/vulnerabilites', express.static('vulnerabilites'));
+app.use('/securise', express.static('securise'));
+app.use('/owasp-top10', express.static('owasp-top10'));
 
 // Routes principales
 app.get('/', (req, res) => {

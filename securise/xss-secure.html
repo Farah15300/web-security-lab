@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protection XSS - Sécurisé</title>
+    <link rel="stylesheet" href="/styles.css">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+    <style>
+        .success-box {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            color: #155724;
+        }
+        .code-example {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            overflow-x: auto;
+        }
+        .test-area {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .output-box {
+            min-height: 100px;
+            padding: 15px;
+            border: 2px solid #28a745;
+            border-radius: 4px;
+            margin-top: 10px;
+            background: white;
+        }
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .comparison > div {
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .vulnerable {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+        }
+        .secure {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✅ Protection XSS - Version Sécurisée</h1>
+            <p><a href="/index.html">← Retour au menu principal</a> | <a href="../vulnerabilites/xss-vulnerable.html">Voir la version vulnérable</a></p>
+        </header>
+
+        <div class="success-box">
+            <h2>✅ Cette page est PROTÉGÉE contre XSS</h2>
+            <p><strong>Toutes les entrées utilisateur sont sanitisées et échappées.</strong></p>
+        </div>
+
+        <section>
+            <h2>Protections Implémentées</h2>
+            <ul>
+                <li>✅ Content Security Policy (CSP) dans les headers</li>
+                <li>✅ Sanitisation de toutes les entrées utilisateur</li>
+                <li>✅ Utilisation de textContent au lieu de innerHTML</li>
+                <li>✅ Échappement HTML pour l'affichage</li>
+                <li>✅ Validation des entrées</li>
+            </ul>
+        </section>
+
+        <div class="test-area">
+            <h3>Test 1: Affichage Sécurisé</h3>
+            <p>Essayez d'injecter du code malveillant - il sera affiché comme du texte.</p>
+            
+            <label for="input1">Entrez votre nom:</label>
+            <input type="text" id="input1" placeholder="Essayez: <img src=x onerror=alert('XSS')>">
+            <button onclick="secureDisplay1()">Afficher (Sécurisé)</button>
+            
+            <div class="output-box" id="output1"></div>
+            
+            <div class="code-example">
+                <strong>Code sécurisé:</strong><br>
+                // Utilisation de textContent au lieu de innerHTML<br>
+                output.textContent = input.value;
+            </div>
+        </div>
+
+        <div class="test-area">
+            <h3>Test 2: Commentaires Sécurisés</h3>
+            <p>Les commentaires sont stockés et affichés de manière sécurisée.</p>
+            
+            <label for="comment">Commentaire:</label><br>
+            <textarea id="comment" rows="3" style="width:100%; max-width:500px;" placeholder="Essayez: <script>alert('XSS')</script>"></textarea><br>
+            <button onclick="storeSecureComment()">Publier (Sécurisé)</button>
+            <button onclick="clearComments()">Effacer tous les commentaires</button>
+            
+            <div class="output-box" id="comments"></div>
+            
+            <div class="code-example">
+                <strong>Solution:</strong><br>
+                // Échappement HTML avant affichage<br>
+                const escaped = sanitizeHTML(comment);<br>
+                // Ou utilisation de textContent
+            </div>
+        </div>
+
+        <div class="test-area">
+            <h3>Test 3: Images Sécurisées</h3>
+            <p>Les URLs sont validées avant utilisation.</p>
+            
+            <label for="url">URL de l'image:</label>
+            <input type="text" id="url" placeholder='Essayez: x" onerror="alert(\'XSS\')" x="'>
+            <button onclick="loadSecureImage()">Charger l'image (Sécurisé)</button>
+            
+            <div class="output-box" id="image-container"></div>
+            
+            <div class="code-example">
+                <strong>Code sécurisé:</strong><br>
+                // Création d'élément DOM + validation d'URL<br>
+                const img = document.createElement('img');<br>
+                img.src = validateURL(url);
+            </div>
+        </div>
+
+        <div class="comparison">
+            <div class="vulnerable">
+                <h3>❌ Code Vulnérable</h3>
+                <pre>element.innerHTML = userInput;
+
+// Permet l'injection de code</pre>
+            </div>
+            <div class="secure">
+                <h3>✅ Code Sécurisé</h3>
+                <pre>element.textContent = userInput;
+
+// Le code est affiché comme texte</pre>
+            </div>
+        </div>
+
+        <section>
+            <h2>Fonctions de Sanitisation</h2>
+            <div class="code-example">
+                <strong>Échappement HTML:</strong><br>
+                <pre>function sanitizeHTML(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;');
+}</pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>Headers de Sécurité</h2>
+            <div class="code-example">
+                <strong>Content-Security-Policy:</strong><br>
+                default-src 'self'; script-src 'self'<br><br>
+                
+                <strong>X-Content-Type-Options:</strong><br>
+                nosniff<br><br>
+                
+                <strong>X-Frame-Options:</strong><br>
+                DENY
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Code SÉCURISÉ - Bonnes pratiques
+
+        // Fonction de sanitisation HTML
+        function sanitizeHTML(str) {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#x27;')
+                .replace(/\//g, '&#x2F;');
+        }
+
+        // Validation d'URL
+        function validateURL(url) {
+            try {
+                const parsed = new URL(url);
+                // N'autoriser que http et https
+                if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+                    throw new Error('Protocole non autorisé');
+                }
+                return url;
+            } catch (e) {
+                return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"><text y="20">URL invalide</text></svg>';
+            }
+        }
+
+        // Affichage sécurisé 1
+        function secureDisplay1() {
+            const input = document.getElementById('input1');
+            const output = document.getElementById('output1');
+            
+            // ✅ SÉCURISÉ: Utilisation de textContent
+            // Le contenu HTML est automatiquement échappé
+            output.textContent = 'Bonjour, ' + input.value + '!';
+            
+            // Alternative: créer un élément texte
+            // const textNode = document.createTextNode('Bonjour, ' + input.value + '!');
+            // output.appendChild(textNode);
+        }
+
+        // Stockage et affichage sécurisé des commentaires
+        function storeSecureComment() {
+            const comment = document.getElementById('comment').value;
+            
+            if (!comment) return;
+            
+            // Validation basique
+            if (comment.length > 1000) {
+                alert('Commentaire trop long (max 1000 caractères)');
+                return;
+            }
+            
+            // Stockage (le sanitisation se fait à l'affichage)
+            let comments = JSON.parse(localStorage.getItem('secure_comments') || '[]');
+            comments.push({
+                text: comment,
+                date: new Date().toLocaleString()
+            });
+            localStorage.setItem('secure_comments', JSON.stringify(comments));
+            
+            displaySecureComments();
+            document.getElementById('comment').value = '';
+        }
+
+        function displaySecureComments() {
+            const comments = JSON.parse(localStorage.getItem('secure_comments') || '[]');
+            const container = document.getElementById('comments');
+            
+            // Vider le conteneur
+            container.innerHTML = '';
+            
+            if (comments.length === 0) {
+                const em = document.createElement('em');
+                em.textContent = 'Aucun commentaire';
+                container.appendChild(em);
+                return;
+            }
+            
+            // ✅ SÉCURISÉ: Création d'éléments DOM
+            comments.forEach(c => {
+                const div = document.createElement('div');
+                div.style.borderBottom = '1px solid #eee';
+                div.style.padding = '10px';
+                
+                const text = document.createElement('div');
+                text.textContent = c.text; // Échappement automatique
+                
+                const date = document.createElement('small');
+                date.style.color = '#666';
+                date.textContent = c.date;
+                
+                div.appendChild(text);
+                div.appendChild(date);
+                container.appendChild(div);
+            });
+        }
+
+        function clearComments() {
+            localStorage.removeItem('secure_comments');
+            displaySecureComments();
+        }
+
+        function loadSecureImage() {
+            const url = document.getElementById('url').value;
+            const container = document.getElementById('image-container');
+            
+            // Vider le conteneur
+            container.innerHTML = '';
+            
+            // Validation de l'URL
+            const validatedURL = validateURL(url);
+            
+            // ✅ SÉCURISÉ: Création d'élément avec propriété, pas innerHTML
+            const img = document.createElement('img');
+            img.src = validatedURL; // La propriété src échappe automatiquement
+            img.style.maxWidth = '200px';
+            img.onerror = function() {
+                container.textContent = '❌ Impossible de charger l\'image';
+            };
+            
+            container.appendChild(img);
+        }
+
+        // Charger les commentaires au chargement
+        window.onload = displaySecureComments;
+    </script>
+</body>
+</html>

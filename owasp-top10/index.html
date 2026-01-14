@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWASP Top 10 - 2021</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .owasp-card {
+            margin: 20px 0;
+            padding: 20px;
+            border-left: 5px solid #dc3545;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .owasp-card h3 {
+            margin-top: 0;
+            color: #dc3545;
+        }
+        .severity-critical { border-left-color: #dc3545; }
+        .severity-high { border-left-color: #fd7e14; }
+        .severity-medium { border-left-color: #ffc107; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .badge-new { background: #28a745; color: white; }
+        .badge-up { background: #dc3545; color: white; }
+        .badge-down { background: #17a2b8; color: white; }
+        .example-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .protection-box {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #dc3545;
+        }
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .nav-links a {
+            padding: 10px 15px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .nav-links a:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔟 OWASP Top 10 - 2021</h1>
+            <p><a href="/index.html">← Retour au menu principal</a></p>
+            <p><strong>Les 10 risques de sécurité les plus critiques pour les applications web</strong></p>
+        </header>
+
+        <div class="nav-links">
+            <a href="#a01">A01: Broken Access Control</a>
+            <a href="#a02">A02: Cryptographic Failures</a>
+            <a href="#a03">A03: Injection</a>
+            <a href="#a04">A04: Insecure Design</a>
+            <a href="#a05">A05: Security Misconfiguration</a>
+            <a href="#a06">A06: Vulnerable Components</a>
+            <a href="#a07">A07: Auth Failures</a>
+            <a href="#a08">A08: Integrity Failures</a>
+            <a href="#a09">A09: Logging Failures</a>
+            <a href="#a10">A10: SSRF</a>
+        </div>
+
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">94%</div>
+                <div>Applications avec Broken Access Control</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">274k</div>
+                <div>Occurrences de vulnérabilités</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">3</div>
+                <div>Nouvelles catégories en 2021</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">33</div>
+                <div>CWEs mappées</div>
+            </div>
+        </section>
+
+        <!-- A01 -->
+        <div class="owasp-card severity-critical" id="a01">
+            <h3>
+                <span class="badge badge-up">⬆️ #5→#1</span>
+                A01:2021 - Broken Access Control
+            </h3>
+            <p><strong>Contrôle d'accès cassé</strong> - Les utilisateurs peuvent accéder à des ressources non autorisées.</p>
+            
+            <div class="example-box">
+                <strong>Exemples d'attaques:</strong>
+                <ul>
+                    <li>Modification d'URL: <code>user.php?id=123</code> → <code>user.php?id=124</code></li>
+                    <li>Élévation de privilèges: user → admin</li>
+                    <li>IDOR (Insecure Direct Object Reference)</li>
+                    <li>API sans authentification</li>
+                    <li>Bypass de vérifications côté client uniquement</li>
+                </ul>
+            </div>
+            
+            <div class="protection-box">
+                <strong>🛡️ Protection:</strong>
+                <ul>
+                    <li>Deny by default - tout est interdit sauf autorisé explicitement</li>
+                    <li>Vérifications d'accès côté serveur sur chaque requête</li>
+                    <li>Ne pas exposer d'IDs séquentiels</li>
+                    <li>Utiliser UUIDs au lieu d'entiers</li>
+                    <li>Journaliser les échecs d'accès</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- A02 -->
+        <div class="owasp-card severity-critical" id="a02">
+            <h3>
+                <span class="badge badge-down">⬇️ #2→#2</span>
+                A02:2021 - Cryptographic Failures
+            </h3>
+            <p><strong>Échec cryptographique</strong> - Protection inadéquate des données sensibles.</p>
+            
+            <div class="example-box">
+                <strong>Exemples:</strong>
+                <ul>
+                    <li>Transmission sans HTTPS (données en clair)</li>
+                    <li>Mots de passe hashés avec MD5 ou SHA1</li>
+                    <li>Stockage de données sensibles en clair</li>
+                    <li>Clés de chiffrement en dur dans le code</li>
+                    <li>Algorithmes obsolètes (DES, 3DES)</li>
+                </ul>
+            </div>
+            
+            <div class="protection-box">
+                <strong>🛡️ Protection:</strong>
+                <ul>
+                    <li>HTTPS partout (TLS 1.2+)</li>
+                    <li>Bcrypt/Argon2 pour les mots de passe</li>
+                    <li>Chiffrement AES-256 pour les données au repos</li>
+                    <li>Gestion sécurisée des clés (HSM, KMS)</li>
+                    <li>Pas de données sensibles en cache</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- A03 -->
+        <div class="owasp-card severity-high" id="a03">
+            <h3>
+                <span class="badge badge-down">⬇️ #1→#3</span>
+                A03:2021 - Injection
+            </h3>
+            <p><strong>Injection de code</strong> - SQL, XSS, commandes OS, etc.</p>
+            
+            <div class="example-box">
+                <strong>Exemples:</strong>
+                <ul>
+                    <li><strong>SQL:</strong> <code>' OR '1'='1</code></li>
+                    <li><strong>XSS:</strong> <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code></li>
+                    <li><strong>Command:</strong> <code>; rm -rf /</code></li>
+                    <li><strong>LDAP:</strong> <code>*)(uid=*))(|(uid=*</code></li>
+                </ul>
+            </div>
+            
+            <div class="protection-box">
+                <strong>🛡️ Protection:</strong>
+                <ul>
+                    <li>Requêtes préparées (Prepared Statements)</li>
+                    <li>ORM (Object-Relational Mapping)</li>
+                    <li>Validation stricte des entrées</li>
+                    <li>Échappement des sorties</li>
+                    <li>Whitelist de caractères autorisés</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- A04 -->
+        <div class="owasp-card severity-high" id="a04">
+            <h3>
+                <span class="badge badge-new">🆕 NEW</span>
+                A04:2021 - Insecure Design
+            </h3>
+            <p><strong>Conception non sécurisée</strong> - Failles dans la conception même de l'application.</p>
+            
+            <div class="example-box">
+                <strong>Exemples:</strong>
+                <ul>
+                    <li>Absence de rate limiting (brute force possible)</li>
+                    <li>Workflow métier sans validation</li>
+                    <li>Pas de défense en profondeur</li>
+                    <li>Questions de sécurité prévisibles</li>
+                    <li>Architecture monolithique fragile</li>
+                </ul>
+            </div>
+            
+            <div class="protection-box">
+                <strong>🛡️ Protection:</strong>
+                <ul>
+                    <li>Threat modeling dès la conception</li>
+                    <li>Secure design patterns</li>
+                    <li>Revue d'architecture par des experts</li>
+                    <li>Tests de sécurité intégrés au dev</li>
+                    <li>DevSecOps</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- A05 -->
+        <div class="owasp-card severity-medium" id="a05">
+            <h3>
+                <span class="badge badge-up">⬆️ #6→#5</span>
+                A05:2021 - Security Misconfiguration
+            </h3>
+            <p><strong>Mauvaise configuration</strong> - Paramètres non sécurisés.</p>
+            
+            <div class="example-box">
+                <strong>Exemples:</strong>
+                <ul>
+                    <li>Comptes par défaut (admin/admin)</li>
+                    <li>Directory listing activé</li>
+                    <li>Stack traces visibles</li>
+                    <li>CORS mal configuré</li>
+                    <li>Headers de sécurité manquants</li>
+                </ul>
+            </div>
+            
+            <div class="protection-box">
+                <strong>🛡️ Protection:</strong>
+                <ul>
+                    <li>Configuration sécurisée par défaut</li>
+                    <li>Désactiver fonctionnalités inutilisées</li>
+                    <li>Headers: CSP, HSTS, X-Frame-Options</li>
+                    <li>Erreurs génériques en production</li>
+                    <li>Audits de configuration réguliers</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- A06 -->
+        <div class="owasp-card severity-medium" id="a06">
+            <h3>
+                <span class="badge badge-up">⬆️ #9→#6</span>
+                A06:2021 - Vulnerable and Outdated Components
+            </h3>
+            <p><strong>Composants vulnérables</strong> - Dépendances avec CVE connus.</p>
+            
+            <div class="example-box">
+                <strong>Exemples:</strong>
+                <ul>
+                    <li>Apache Struts vulnérable (Equifax breach)</li>
+                    <li>Log4Shell (CVE-2021-44228)</li>
+                    <li>Bibliothèques npm non maintenues</li>
+                    <li>WordPress plugins obsolètes</li>
+                </ul>
+            </div>
+            
+            <div class="protection-box">
+                <strong>🛡️ Protection:</strong>
+                <ul>
+                    <li><code>npm audit</code> ou <code>pip-audit</code></li>
+                    <li>Dependabot / Renovate</li>
+                    <li>SBOM (Software Bill of Materials)</li>
+                    <li>Patch management</li>
+                    <li>Retirer dépendances inutilisées</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- A07 -->
+        <div class="owasp-card severity-high" id="a07">
+            <h3>
+                <span class="badge badge-down">⬇️ #2→#7</span>
+                A07:2021 - Identification and Authentication Failures
+            </h3>
+            <p><strong>Échecs d'authentification</strong> - Failles dans la gestion des identités.</p>
+            
+            <div class="example-box">
+                <strong>Exemples:</strong>
+                <ul>
+                    <li>Brute force sans rate limiting</li>
+                    <li>Mots de passe faibles acceptés</li>
+                    <li>Sessions qui n'expirent pas</li>
+                    <li>Pas de MFA disponible</li>
+                    <li>Récupération de mot de passe non sécurisée</li>
+                </ul>
+            </div>
+            
+            <div class="protection-box">
+                <strong>🛡️ Protection:</strong>
+                <ul>
+                    <li>MFA (Multi-Factor Authentication)</li>
+                    <li>Politique de mots de passe forts</li>
+                    <li>Rate limiting sur login</li>
+                    <li>Sessions avec timeout</li>
+                    <li>Pas de credential stuffing</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- A08 -->
+        <div class="owasp-card severity-medium" id="a08">
+            <h3>
+                <span class="badge badge-new">🆕 NEW</span>
+                A08:2021 - Software and Data Integrity Failures
+            </h3>
+            <p><strong>Échecs d'intégrité</strong> - Code et données non vérifiés.</p>
+            
+            <div class="example-box">
+                <strong>Exemples:</strong>
+                <ul>
+                    <li>CDN compromis (JavaScript malveillant)</li>
+                    <li>Updates automatiques non signés</li>
+                    <li>Pipeline CI/CD non sécurisé</li>
+                    <li>Désérialisation non sécurisée</li>
+                </ul>
+            </div>
+            
+            <div class="protection-box">
+                <strong>🛡️ Protection:</strong>
+                <ul>
+                    <li>Subresource Integrity (SRI)</li>
+                    <li>Signature de code</li>
+                    <li>CI/CD pipeline sécurisé</li>
+                    <li>Vérification des checksums</li>
+                    <li>Éviter désérialisation de données non fiables</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- A09 -->
+        <div class="owasp-card severity-medium" id="a09">
+            <h3>
+                <span class="badge badge-down">⬇️ #10→#9</span>
+                A09:2021 - Security Logging and Monitoring Failures
+            </h3>
+            <p><strong>Échecs de journalisation</strong> - Manque de visibilité.</p>
+            
+            <div class="example-box">
+                <strong>Problèmes:</strong>
+                <ul>
+                    <li>Connexions échouées non loggées</li>
+                    <li>Logs non surveillés</li>
+                    <li>Pas d'alertes temps réel</li>
+                    <li>Logs facilement effaçables</li>
+                </ul>
+            </div>
+            
+            <div class="protection-box">
+                <strong>🛡️ Protection:</strong>
+                <ul>
+                    <li>Logger tous événements critiques</li>
+                    <li>SIEM (Security Information and Event Management)</li>
+                    <li>Alertes automatiques</li>
+                    <li>Logs immuables et centralisés</li>
+                    <li>Plan de réponse aux incidents</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- A10 -->
+        <div class="owasp-card severity-high" id="a10">
+            <h3>
+                <span class="badge badge-new">🆕 NEW</span>
+                A10:2021 - Server-Side Request Forgery (SSRF)
+            </h3>
+            <p><strong>SSRF</strong> - Application récupère des URLs non validées.</p>
+            
+            <div class="example-box">
+                <strong>Exemples d'attaques:</strong>
+                <ul>
+                    <li>Accès métadonnées cloud: <code>http://169.254.169.254/</code></li>
+                    <li>Scan réseau interne</li>
+                    <li>Bypass de firewall</li>
+                    <li>Lecture de fichiers locaux: <code>file:///etc/passwd</code></li>
+                </ul>
+            </div>
+            
+            <div class="protection-box">
+                <strong>🛡️ Protection:</strong>
+                <ul>
+                    <li>Whitelist stricte d'URLs/domaines</li>
+                    <li>Pas de redirection d'URL utilisateur</li>
+                    <li>Validation schema (http/https seulement)</li>
+                    <li>Firewall entre app et réseau interne</li>
+                    <li>Désactiver redirections HTTP</li>
+                </ul>
+            </div>
+        </div>
+
+        <section style="margin-top: 40px;">
+            <h2>📚 Ressources d'Apprentissage</h2>
+            <ul>
+                <li><a href="https://owasp.org/www-project-top-ten/" target="_blank">OWASP Top 10 Official Website</a></li>
+                <li><a href="https://owasp.org/www-project-web-security-testing-guide/" target="_blank">OWASP Testing Guide</a></li>
+                <li><a href="https://cheatsheetseries.owasp.org/" target="_blank">OWASP Cheat Sheet Series</a></li>
+                <li><a href="https://owasp.org/www-project-webgoat/" target="_blank">WebGoat - Hands-on Training</a></li>
+                <li><a href="https://portswigger.net/web-security" target="_blank">PortSwigger Web Security Academy</a></li>
+            </ul>
+        </section>
+    </div>
+</body>
+</html>

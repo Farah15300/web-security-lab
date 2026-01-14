@@ -14,14 +14,69 @@
         </header>
 
         <nav class="modules">
-            <button onclick="showModule('permissions')" class="active">Permissions Navigateur</button>
+            <button onclick="showModule('home')" class="active">Accueil</button>
+            <button onclick="showModule('permissions')">Permissions Navigateur</button>
             <button onclick="showModule('xss')">XSS (Cross-Site Scripting)</button>
             <button onclick="showModule('csrf')">CSRF (Cross-Site Request Forgery)</button>
             <button onclick="showModule('owasp')">OWASP Top 10</button>
         </nav>
 
+        <!-- Module Accueil -->
+        <div id="home" class="module active">
+            <h2>Bienvenue au Laboratoire de Sécurité Web</h2>
+            <div class="info-box">
+                <p><strong>Objectif:</strong> Comprendre les vulnérabilités web et apprendre à s'en protéger de manière éthique.</p>
+            </div>
+
+            <section style="margin: 30px 0;">
+                <h3>📂 Structure du Projet</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+                    
+                    <div style="border: 2px solid #007bff; border-radius: 8px; padding: 20px; background: #f8f9fa;">
+                        <h4 style="color: #007bff; margin-top: 0;">🔐 Permissions Navigateur</h4>
+                        <p>Exemples de permissions (caméra, micro, géolocalisation)</p>
+                        <a href="../permissions-navigateur/index.html" style="display: inline-block; margin-top: 10px; padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;">Explorer →</a>
+                    </div>
+
+                    <div style="border: 2px solid #dc3545; border-radius: 8px; padding: 20px; background: #f8f9fa;">
+                        <h4 style="color: #dc3545; margin-top: 0;">⚠️ Vulnérabilités</h4>
+                        <p>Démonstrations XSS, CSRF, injection SQL (vulnérables)</p>
+                        <a href="../vulnerabilites/xss-vulnerable.html" style="display: inline-block; margin-top: 10px; padding: 8px 16px; background: #dc3545; color: white; text-decoration: none; border-radius: 4px;">Explorer →</a>
+                    </div>
+
+                    <div style="border: 2px solid #28a745; border-radius: 8px; padding: 20px; background: #f8f9fa;">
+                        <h4 style="color: #28a745; margin-top: 0;">✅ Versions Sécurisées</h4>
+                        <p>Implémentations protégées contre les vulnérabilités</p>
+                        <a href="../securise/xss-secure.html" style="display: inline-block; margin-top: 10px; padding: 8px 16px; background: #28a745; color: white; text-decoration: none; border-radius: 4px;">Explorer →</a>
+                    </div>
+
+                    <div style="border: 2px solid #ffc107; border-radius: 8px; padding: 20px; background: #f8f9fa;">
+                        <h4 style="color: #f57c00; margin-top: 0;">🔟 OWASP Top 10</h4>
+                        <p>Les 10 risques de sécurité les plus critiques</p>
+                        <a href="../owasp-top10/index.html" style="display: inline-block; margin-top: 10px; padding: 8px 16px; background: #ffc107; color: #000; text-decoration: none; border-radius: 4px;">Explorer →</a>
+                    </div>
+                </div>
+            </section>
+
+            <div class="info-box warning">
+                <h4>⚠️ AVERTISSEMENT IMPORTANT</h4>
+                <p><strong>Ce projet est STRICTEMENT à des fins éducatives.</strong></p>
+                <ul>
+                    <li>✅ Utilisez-le pour <strong>apprendre</strong> la sécurité web</li>
+                    <li>✅ Testez uniquement sur <strong>vos propres systèmes</strong></li>
+                    <li>❌ <strong>INTERDIT</strong> d'utiliser ces techniques contre des systèmes sans autorisation</li>
+                    <li>❌ L'utilisation malveillante est <strong>ILLÉGALE</strong></li>
+                </ul>
+            </div>
+
+            <section style="margin: 30px 0;">
+                <h3>📚 Modules d'Apprentissage Intégrés</h3>
+                <p>Utilisez les onglets ci-dessus pour explorer les démonstrations interactives directement dans cette page, ou cliquez sur les liens ci-dessus pour accéder aux modules détaillés.</p>
+            </section>
+        </div>
+
         <!-- Module Permissions -->
-        <div id="permissions" class="module active">
+        <div id="permissions" class="module">
             <h2>Permissions du Navigateur</h2>
             <div class="info-box">
                 <p><strong>Objectif:</strong> Comprendre comment demander et gérer les permissions utilisateur de manière éthique.</p>
