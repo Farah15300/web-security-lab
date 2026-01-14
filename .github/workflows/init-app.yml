@@ -159,10 +159,11 @@ jobs:
           const fs = require('fs');
           const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
           
-          // Sécurité
-          if ('${{ inputs.security_features }}' !== 'Aucune') {
-            pkg.dependencies['helmet'] = '^7.1.0';
-            pkg.dependencies['cors'] = '^2.8.5';
+          // Sécurité - Always include security packages
+          pkg.dependencies['helmet'] = '^7.1.0';
+          pkg.dependencies['cors'] = '^2.8.5';
+          
+          if ('${{ inputs.security_features }}'.includes('Avancée') || '${{ inputs.security_features }}'.includes('Complète')) {
             pkg.dependencies['express-rate-limit'] = '^7.1.5';
           }
           
@@ -197,7 +198,15 @@ jobs:
       
       - name: 🔧 Création du fichier principal (index.js)
         run: |
-          cat > src/index.js << 'EOF'
+          # Escape HTML characters for security
+          APP_NAME_ESC=$(echo "${{ inputs.app_name }}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#x27;/g')
+          APP_TYPE_ESC=$(echo "${{ inputs.app_type }}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#x27;/g')
+          FRAMEWORK_ESC=$(echo "${{ inputs.framework }}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#x27;/g')
+          DATABASE_ESC=$(echo "${{ inputs.database }}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#x27;/g')
+          AUTH_ESC=$(echo "${{ inputs.auth_method }}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#x27;/g')
+          SECURITY_ESC=$(echo "${{ inputs.security_features }}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#x27;/g')
+          
+          cat > src/index.js << EOF
           require('dotenv').config();
           const express = require('express');
           const path = require('path');
@@ -212,13 +221,13 @@ jobs:
           
           // Route principale
           app.get('/', (req, res) => {
-            res.send(`
+            res.send(\`
               <!DOCTYPE html>
               <html lang="fr">
               <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>${{ inputs.app_name }}</title>
+                <title>${APP_NAME_ESC}</title>
                 <style>
                   body {
                     font-family: system-ui, -apple-system, sans-serif;
@@ -258,20 +267,20 @@ jobs:
               </head>
               <body>
                 <div class="container">
-                  <h1>🚀 ${{ inputs.app_name }}</h1>
+                  <h1>🚀 ${APP_NAME_ESC}</h1>
                   <p>Application initialisée avec succès!</p>
                   
                   <div>
-                    <span class="badge">📱 ${{ inputs.app_type }}</span>
-                    <span class="badge">🛠️ ${{ inputs.framework }}</span>
-                    <span class="badge">💾 ${{ inputs.database }}</span>
-                    <span class="badge">🔐 ${{ inputs.auth_method }}</span>
+                    <span class="badge">📱 ${APP_TYPE_ESC}</span>
+                    <span class="badge">🛠️ ${FRAMEWORK_ESC}</span>
+                    <span class="badge">💾 ${DATABASE_ESC}</span>
+                    <span class="badge">🔐 ${AUTH_ESC}</span>
                   </div>
                   
                   <div class="info">
                     <h3>✅ Fonctionnalités incluses:</h3>
                     <ul>
-                      <li>🛡️ Protection de sécurité: <strong>${{ inputs.security_features }}</strong></li>
+                      <li>🛡️ Protection de sécurité: <strong>${SECURITY_ESC}</strong></li>
                       <li>🧪 Tests: <strong>${{ inputs.include_tests }}</strong></li>
                       <li>🐳 Docker: <strong>${{ inputs.include_docker }}</strong></li>
                       <li>⚙️ CI/CD: <strong>${{ inputs.include_ci }}</strong></li>
@@ -288,7 +297,7 @@ jobs:
                 </div>
               </body>
               </html>
-            `);
+            \`);
           });
           
           // Route de santé
@@ -301,7 +310,7 @@ jobs:
           });
           
           app.listen(PORT, () => {
-            console.log(\`🚀 ${{ inputs.app_name }} démarré sur http://localhost:\${PORT}\`);
+            console.log(\\\`🚀 ${{ inputs.app_name }} démarré sur http://localhost:\\\${PORT}\\\`);
           });
           EOF
           
@@ -561,9 +570,22 @@ jobs:
           - ✅ .env.example
           - ✅ README.md
           - ✅ .gitignore
-          ${{ inputs.include_docker == true && '- ✅ Dockerfile et docker-compose.yml' || '' }}
-          ${{ inputs.include_tests == true && '- ✅ Configuration de tests (Jest)' || '' }}
-          ${{ inputs.include_ci == true && '- ✅ Workflow CI/CD (.github/workflows/ci.yml)' || '' }}
+          EOF
+          
+          # Add conditional lines based on options
+          if [ "${{ inputs.include_docker }}" = "true" ]; then
+            echo "- ✅ Dockerfile et docker-compose.yml" >> INIT_REPORT.md
+          fi
+          
+          if [ "${{ inputs.include_tests }}" = "true" ]; then
+            echo "- ✅ Configuration de tests (Jest)" >> INIT_REPORT.md
+          fi
+          
+          if [ "${{ inputs.include_ci }}" = "true" ]; then
+            echo "- ✅ Workflow CI/CD (.github/workflows/ci.yml)" >> INIT_REPORT.md
+          fi
+          
+          cat >> INIT_REPORT.md << 'EOF'
           
           ## 🚀 Prochaines Étapes
           
@@ -597,13 +619,22 @@ jobs:
             src/
             public/
             views/
-            tests/
-            .github/
             package.json
             .env.example
             .gitignore
             README.md
             INIT_REPORT.md
+          retention-days: 30
+      
+      - name: 📤 Upload des fichiers optionnels (si présents)
+        uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with:
+          name: ${{ inputs.app_name }}-${{ github.run_number }}-optional
+          path: |
+            tests/
+            .github/
             Dockerfile
             docker-compose.yml
             .dockerignore
