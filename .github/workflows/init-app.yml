@@ -130,19 +130,23 @@ jobs:
       
       - name: 📝 Création du package.json
         run: |
-          cat > package.json << 'EOF'
+          # Escape JSON characters
+          APP_NAME_PKG=$(echo "${{ inputs.app_name }}" | sed 's/\\/\\\\/g; s/"/\\"/g')
+          AUTHOR_PKG=$(echo "${{ github.actor }}" | sed 's/\\/\\\\/g; s/"/\\"/g')
+          
+          cat > package.json << EOF
           {
-            "name": "${{ inputs.app_name }}",
+            "name": "${APP_NAME_PKG}",
             "version": "1.0.0",
             "description": "Application générée par le workflow d'initialisation",
             "main": "src/index.js",
             "scripts": {
               "start": "node src/index.js",
               "dev": "nodemon src/index.js",
-              "test": "echo \"Tests à configurer\" && exit 0"
+              "test": "echo \\"Tests à configurer\\" && exit 0"
             },
             "keywords": [],
-            "author": "${{ github.actor }}",
+            "author": "${AUTHOR_PKG}",
             "license": "MIT",
             "dependencies": {
               "express": "^4.18.2",
@@ -318,7 +322,7 @@ jobs:
           });
           
           app.listen(PORT, () => {
-            console.log(\\\`🚀 ${APP_NAME_JSON} démarré sur http://localhost:\\\${PORT}\\\`);
+            console.log('🚀 ${APP_NAME_JSON} démarré sur http://localhost:' + PORT);
           });
           EOF
           
