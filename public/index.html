@@ -3,33 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laboratoire de Sécurité Web</title>
+    <meta name="description" content="Environnement d'apprentissage interactif pour comprendre les vulnérabilités web">
+    <title>🔒 Laboratoire de Sécurité Web - Apprentissage Interactif</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>🔒 Laboratoire de Sécurité Web</h1>
-            <p>Environnement d'apprentissage éducatif</p>
+            <p>✨ Environnement d'apprentissage interactif et éducatif ✨</p>
+            <p style="font-size: 0.9em; opacity: 0.85; margin-top: 8px;">Découvrez les vulnérabilités web et apprenez à les prévenir</p>
         </header>
 
         <nav class="modules">
-            <button onclick="showModule('permissions')" class="active">Permissions Navigateur</button>
-            <button onclick="showModule('xss')">XSS (Cross-Site Scripting)</button>
-            <button onclick="showModule('csrf')">CSRF (Cross-Site Request Forgery)</button>
-            <button onclick="showModule('owasp')">OWASP Top 10</button>
+            <button onclick="showModule('permissions')" class="active">🎥 Permissions Navigateur</button>
+            <button onclick="showModule('xss')">⚡ XSS (Cross-Site Scripting)</button>
+            <button onclick="showModule('csrf')">🛡️ CSRF</button>
+            <button onclick="showModule('owasp')">📋 OWASP Top 10</button>
         </nav>
 
         <!-- Module Permissions -->
         <div id="permissions" class="module active">
-            <h2>Permissions du Navigateur</h2>
+            <h2>🎥 Permissions du Navigateur</h2>
             <div class="info-box">
-                <p><strong>Objectif:</strong> Comprendre comment demander et gérer les permissions utilisateur de manière éthique.</p>
+                <p><strong>🎯 Objectif:</strong> Comprendre comment demander et gérer les permissions utilisateur de manière éthique et responsable.</p>
+                <p style="margin-top: 10px;"><em>Les permissions doivent toujours être demandées avec transparence et respect du consentement de l'utilisateur.</em></p>
             </div>
 
             <div class="demo-section">
-                <h3>1. Permission Caméra</h3>
-                <button onclick="requestCamera()">Demander Permission Caméra</button>
+                <h3>📹 1. Permission Caméra</h3>
+                <button onclick="requestCamera()">📸 Demander Permission Caméra</button>
                 <div id="camera-status" class="status"></div>
                 <video id="video" autoplay playsinline style="display:none; max-width:100%; margin-top:10px;"></video>
                 <button onclick="stopCamera()" style="display:none;" id="stop-camera">Arrêter la Caméra</button>
@@ -48,8 +51,8 @@
             </div>
 
             <div class="demo-section">
-                <h3>2. Géolocalisation</h3>
-                <button onclick="requestLocation()">Demander Position</button>
+                <h3>📍 2. Géolocalisation</h3>
+                <button onclick="requestLocation()">🗺️ Demander Position</button>
                 <div id="location-status" class="status"></div>
                 
                 <div class="code-box">
@@ -65,8 +68,8 @@
             </div>
 
             <div class="demo-section">
-                <h3>3. Notifications</h3>
-                <button onclick="requestNotification()">Demander Permission Notifications</button>
+                <h3>🔔 3. Notifications</h3>
+                <button onclick="requestNotification()">📬 Demander Permission Notifications</button>
                 <div id="notification-status" class="status"></div>
             </div>
 
@@ -83,15 +86,17 @@
 
         <!-- Module XSS -->
         <div id="xss" class="module">
-            <h2>XSS - Cross-Site Scripting</h2>
+            <h2>⚡ XSS - Cross-Site Scripting</h2>
             <div class="info-box">
-                <p><strong>Définition:</strong> Injection de code JavaScript malveillant dans une page web.</p>
+                <p><strong>📖 Définition:</strong> Injection de code JavaScript malveillant dans une page web permettant à un attaquant d'exécuter du code dans le navigateur d'autres utilisateurs.</p>
+                <p style="margin-top: 10px;"><strong>⚠️ Impact:</strong> Vol de cookies, redirection, manipulation du DOM, vol de données sensibles.</p>
             </div>
 
             <div class="demo-section">
-                <h3>Version VULNÉRABLE ⚠️</h3>
+                <h3>❌ Version VULNÉRABLE</h3>
+                <p style="color: #d32f2f; font-weight: 500; margin-bottom: 10px;">⚠️ Ne jamais utiliser en production !</p>
                 <textarea id="vulnerable-input" placeholder="Essayez: <img src=x onerror=alert('XSS')>"></textarea>
-                <button onclick="submitVulnerable()">Soumettre (Vulnérable)</button>
+                <button onclick="submitVulnerable()">⚠️ Soumettre (Vulnérable)</button>
                 <div id="vulnerable-output" class="output"></div>
                 
                 <div class="info-box warning">
@@ -100,9 +105,10 @@
             </div>
 
             <div class="demo-section">
-                <h3>Version SÉCURISÉE ✅</h3>
+                <h3>✅ Version SÉCURISÉE</h3>
+                <p style="color: #2e7d32; font-weight: 500; margin-bottom: 10px;">🛡️ Protection activée</p>
                 <textarea id="secure-input" placeholder="Essayez: <img src=x onerror=alert('XSS')>"></textarea>
-                <button onclick="submitSecure()">Soumettre (Sécurisé)</button>
+                <button onclick="submitSecure()">✅ Soumettre (Sécurisé)</button>
                 <div id="secure-output" class="output"></div>
                 
                 <div class="info-box success">
@@ -124,16 +130,18 @@
 
         <!-- Module CSRF -->
         <div id="csrf" class="module">
-            <h2>CSRF - Cross-Site Request Forgery</h2>
+            <h2>🛡️ CSRF - Cross-Site Request Forgery</h2>
             <div class="info-box">
-                <p><strong>Définition:</strong> Forcer un utilisateur authentifié à exécuter des actions non désirées.</p>
+                <p><strong>📖 Définition:</strong> Attaque qui force un utilisateur authentifié à exécuter des actions non désirées sur une application web.</p>
+                <p style="margin-top: 10px;"><strong>⚠️ Impact:</strong> Transferts non autorisés, modifications de données, changements de paramètres.</p>
             </div>
 
             <div class="demo-section">
-                <h3>Version VULNÉRABLE ⚠️</h3>
+                <h3>❌ Version VULNÉRABLE</h3>
+                <p style="color: #d32f2f; font-weight: 500; margin-bottom: 10px;">⚠️ Aucune protection CSRF</p>
                 <input type="text" id="vulnerable-to" placeholder="Destinataire">
                 <input type="number" id="vulnerable-amount" placeholder="Montant">
-                <button onclick="vulnerableTransfer()">Transférer (Vulnérable)</button>
+                <button onclick="vulnerableTransfer()">⚠️ Transférer (Vulnérable)</button>
                 <div id="vulnerable-transfer-result" class="status"></div>
                 
                 <div class="info-box warning">
@@ -142,10 +150,11 @@
             </div>
 
             <div class="demo-section">
-                <h3>Version SÉCURISÉE ✅</h3>
+                <h3>✅ Version SÉCURISÉE</h3>
+                <p style="color: #2e7d32; font-weight: 500; margin-bottom: 10px;">🛡️ Protégé par token CSRF</p>
                 <input type="text" id="secure-to" placeholder="Destinataire">
                 <input type="number" id="secure-amount" placeholder="Montant">
-                <button onclick="secureTransfer()">Transférer (Sécurisé)</button>
+                <button onclick="secureTransfer()">✅ Transférer (Sécurisé)</button>
                 <div id="secure-transfer-result" class="status"></div>
                 
                 <div class="info-box success">
@@ -167,70 +176,71 @@
 
         <!-- Module OWASP -->
         <div id="owasp" class="module">
-            <h2>OWASP Top 10 (2021)</h2>
+            <h2>📋 OWASP Top 10 (2021)</h2>
             <div class="info-box">
-                <p><strong>OWASP:</strong> Open Web Application Security Project - Les 10 risques de sécurité les plus critiques.</p>
+                <p><strong>🏛️ OWASP:</strong> Open Web Application Security Project</p>
+                <p style="margin-top: 10px;">Les 10 risques de sécurité les plus critiques pour les applications web, mis à jour régulièrement par la communauté de sécurité mondiale.</p>
             </div>
 
             <div class="owasp-list">
                 <div class="owasp-item">
-                    <h3>A01: Broken Access Control</h3>
+                    <h3>🔓 A01: Broken Access Control</h3>
                     <p>Les utilisateurs peuvent accéder à des ressources non autorisées.</p>
-                    <strong>Exemple:</strong> Modifier l'ID dans l'URL pour voir le profil d'un autre utilisateur.
+                    <strong>💡 Exemple:</strong> Modifier l'ID dans l'URL pour voir le profil d'un autre utilisateur.
                 </div>
 
                 <div class="owasp-item">
-                    <h3>A02: Cryptographic Failures</h3>
+                    <h3>🔐 A02: Cryptographic Failures</h3>
                     <p>Échec de protection des données sensibles (mots de passe, cartes bancaires).</p>
-                    <strong>Solution:</strong> Chiffrement, HTTPS, hashage des mots de passe.
+                    <strong>✅ Solution:</strong> Chiffrement, HTTPS, hashage des mots de passe.
                 </div>
 
                 <div class="owasp-item">
-                    <h3>A03: Injection</h3>
+                    <h3>💉 A03: Injection</h3>
                     <p>SQL, XSS, commande OS - injection de code malveillant.</p>
-                    <strong>Solution:</strong> Paramètres préparés, validation des entrées.
+                    <strong>✅ Solution:</strong> Paramètres préparés, validation des entrées.
                 </div>
 
                 <div class="owasp-item">
-                    <h3>A04: Insecure Design</h3>
+                    <h3>🏗️ A04: Insecure Design</h3>
                     <p>Failles de conception et d'architecture.</p>
-                    <strong>Solution:</strong> Threat modeling, design patterns sécurisés.
+                    <strong>✅ Solution:</strong> Threat modeling, design patterns sécurisés.
                 </div>
 
                 <div class="owasp-item">
-                    <h3>A05: Security Misconfiguration</h3>
+                    <h3>⚙️ A05: Security Misconfiguration</h3>
                     <p>Configurations par défaut, messages d'erreur verbeux.</p>
-                    <strong>Solution:</strong> Hardening, désactivation des fonctionnalités inutiles.
+                    <strong>✅ Solution:</strong> Hardening, désactivation des fonctionnalités inutiles.
                 </div>
 
                 <div class="owasp-item">
-                    <h3>A06: Vulnerable Components</h3>
+                    <h3>📦 A06: Vulnerable Components</h3>
                     <p>Utilisation de bibliothèques avec des vulnérabilités connues.</p>
-                    <strong>Solution:</strong> Mise à jour régulière, audit des dépendances.
+                    <strong>✅ Solution:</strong> Mise à jour régulière, audit des dépendances.
                 </div>
 
                 <div class="owasp-item">
-                    <h3>A07: Authentication Failures</h3>
+                    <h3>🔑 A07: Authentication Failures</h3>
                     <p>Failles dans l'authentification et la gestion de session.</p>
-                    <strong>Solution:</strong> MFA, rate limiting, gestion sécurisée des sessions.
+                    <strong>✅ Solution:</strong> MFA, rate limiting, gestion sécurisée des sessions.
                 </div>
 
                 <div class="owasp-item">
-                    <h3>A08: Software Data Integrity</h3>
+                    <h3>📝 A08: Software Data Integrity</h3>
                     <p>Code et infrastructure sans vérification d'intégrité.</p>
-                    <strong>Solution:</strong> Signature de code, CI/CD sécurisé.
+                    <strong>✅ Solution:</strong> Signature de code, CI/CD sécurisé.
                 </div>
 
                 <div class="owasp-item">
-                    <h3>A09: Security Logging Failures</h3>
+                    <h3>📊 A09: Security Logging Failures</h3>
                     <p>Logging et monitoring insuffisants.</p>
-                    <strong>Solution:</strong> Logs détaillés, alertes, SIEM.
+                    <strong>✅ Solution:</strong> Logs détaillés, alertes, SIEM.
                 </div>
 
                 <div class="owasp-item">
-                    <h3>A10: Server-Side Request Forgery (SSRF)</h3>
+                    <h3>🌐 A10: Server-Side Request Forgery (SSRF)</h3>
                     <p>L'application récupère des ressources distantes sans validation.</p>
-                    <strong>Solution:</strong> Whitelist d'URLs, validation des entrées.
+                    <strong>✅ Solution:</strong> Whitelist d'URLs, validation des entrées.
                 </div>
             </div>
 
